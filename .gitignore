@@ -1,0 +1,16 @@
+# Binarios y artefactos de compilacion
+*.o
+*.elf
+*.bin
+*.iso
+*.cdi
+romdisk.img
+
+# Backups y tars intermedios usados durante el desarrollo
+*.ORIG
+*.BACKUP_*
+*_modified.tar
+neo4all_modified.tar
+
+# Imagen de disco generada para pruebas en Flycast
+/disc/
