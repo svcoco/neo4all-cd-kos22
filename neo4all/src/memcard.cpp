@@ -43,7 +43,11 @@ static int init_savestate(void)
 	pkg.data = (const uint8*)&neogeo_memorycard;
 
 	memcpy((void *)&pkg.icon_pal[0],(void *)&vmu_savestate_icon_pal,32);
-	pkg.icon_data = (const uint8*)&vmu_savestate_icon_data;
+	/* KOS 2.2.x: vmu_pkg_t.icon_data es uint8_t* (no const), a diferencia de
+	   pkg.data que si es const uint8_t*. vmu_savestate_icon_data es const
+	   porque es un array estatico de solo lectura; vmu_pkg_build() solo lo
+	   lee para serializarlo, asi que const_cast es seguro aqui. */
+	pkg.icon_data = const_cast<uint8*>(vmu_savestate_icon_data);
 
 	vmu_pkg_build(&pkg, &paquete, &paquete_size);
 

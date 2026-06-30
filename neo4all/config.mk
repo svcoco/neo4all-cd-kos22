@@ -247,7 +247,8 @@ OBJS =	\
 	src/input/input.o \
 	src/main.o \
 	src/icon.o \
-	src/memcard.o 
+	src/memcard.o \
+	src/kos_compat_stubs.o 
 
 ifdef AES
 OBJS+= \

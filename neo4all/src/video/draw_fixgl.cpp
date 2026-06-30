@@ -82,7 +82,7 @@ static pvr_dr_state_t  dr_state;
 
 static __inline__ void prepare_pvr_init(void)
 {
-	gl_poly_cxt.txr.filter= neo4all_filter;
+	gl_poly_cxt.txr.filter= neo4all_pvr_filter;
 	gl_poly_cxt.gen.alpha = PVR_ALPHA_DISABLE;
 	gl_poly_cxt.txr.alpha = PVR_TXRALPHA_ENABLE;
 	gl_poly_cxt.blend.src = PVR_BLEND_SRCALPHA; //PVR_BLEND_ONE;
@@ -90,7 +90,7 @@ static __inline__ void prepare_pvr_init(void)
 	gl_poly_cxt.gen.culling = PVR_CULLING_NONE;
 	gl_poly_cxt.txr.width = 8;
 	gl_poly_cxt.txr.height = 8;
-	gl_poly_cxt.txr.format = GL_ARGB1555;
+	gl_poly_cxt.txr.format = PVR_TXRFMT_ARGB1555;
 }
 
 static __inline__ void prepare_pvr_per_font(void *texture_mem)
@@ -98,7 +98,7 @@ static __inline__ void prepare_pvr_per_font(void *texture_mem)
 	gl_poly_cxt.txr.base = texture_mem;
 	pvr_poly_compile(&polyhdr, &gl_poly_cxt);
 	pvr_prim(&polyhdr, sizeof(pvr_poly_hdr_t));
-	pvr_dr_init(dr_state);
+	pvr_dr_init(&dr_state);
 }
 
 #endif
@@ -238,7 +238,8 @@ void video_draw_font_textures_gl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, 8, 8, 0, 
 		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, font_buffer);
 #else
-	glKosTex2D(GL_ARGB1555,512,512,font_buffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
+		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, font_buffer);
 #endif
 	glBegin(GL_QUADS);
 	GL_VERTICE_FLIP_NONE

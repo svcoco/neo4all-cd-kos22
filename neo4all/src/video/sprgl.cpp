@@ -91,13 +91,20 @@ static __inline__ void create_tile(unsigned int tileno,int color,unsigned short 
 }
 
 #ifdef DREAMCAST
-extern pvr_poly_cxt_t gl_poly_cxt;
+/* gl_poly_cxt nunca se definia en ningun .cpp del proyecto original (bug
+   preexistente: solo se declaraba 'extern' aqui y en draw_fixgl.cpp). En
+   KOS 1.x el linker probablemente lo resolvia contra una variable global de
+   KGL con el mismo nombre; GLdc no provee tal simbolo. Se define la
+   instancia real aqui, ya que ambos consumidores reinicializan todos los
+   campos que usan antes de cada draw (prepare_pvr_init()), por lo que
+   compartir una unica instancia entre sprgl.cpp/draw_fixgl.cpp es seguro. */
+pvr_poly_cxt_t gl_poly_cxt;
 static pvr_poly_hdr_t polyhdr;
 static pvr_dr_state_t  dr_state;
 
 static __inline__ void prepare_pvr_init(void)
 {
-	gl_poly_cxt.txr.filter= neo4all_filter;
+	gl_poly_cxt.txr.filter= neo4all_pvr_filter;
 	gl_poly_cxt.gen.alpha = PVR_ALPHA_DISABLE;
 	gl_poly_cxt.txr.alpha = PVR_TXRALPHA_ENABLE;
 	gl_poly_cxt.blend.src = PVR_BLEND_SRCALPHA; //PVR_BLEND_ONE;
@@ -105,7 +112,7 @@ static __inline__ void prepare_pvr_init(void)
 	gl_poly_cxt.gen.culling = PVR_CULLING_NONE;
 	gl_poly_cxt.txr.width = 16;
 	gl_poly_cxt.txr.height = 16;
-	gl_poly_cxt.txr.format = GL_ARGB1555;
+	gl_poly_cxt.txr.format = PVR_TXRFMT_ARGB1555;
 }
 
 static __inline__ void prepare_pvr_per_tile(void *texture_mem)
@@ -113,7 +120,7 @@ static __inline__ void prepare_pvr_per_tile(void *texture_mem)
 	gl_poly_cxt.txr.base = texture_mem;
 	pvr_poly_compile(&polyhdr, &gl_poly_cxt);
 	pvr_prim(&polyhdr, sizeof(pvr_poly_hdr_t));
-	pvr_dr_init(dr_state);
+	pvr_dr_init(&dr_state);
 }
 
 #endif
@@ -252,7 +259,8 @@ void video_draw_tile_textures_gl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, 16, 16, 0, 
 		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, texture_buffer);
 #else
-	glKosTex2D(GL_ARGB1555,512,512,texture_buffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
+		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, texture_buffer);
 #endif
         glBegin(GL_QUADS);
 	switch(tile_list[i].type)

@@ -25,6 +25,9 @@ fcache_node_t cache_font[FCACHE_SIZE];
 fcache_node_t *first_font, *last_font;
 
 unsigned neo4all_filter=NEO4ALL_FILTER_NONE;
+#ifdef DREAMCAST
+unsigned neo4all_pvr_filter=NEO4ALL_PVR_FILTER_NONE;
+#endif
 
 TILE_LIST tile_list[TCACHE_SIZE+FCACHE_SIZE];
 unsigned n_tile_list=0;
@@ -149,9 +152,6 @@ SDL_bool init_video_gl(void) {
     glGenTextures(1,(GLuint *)&screen_texture);
     glBindTexture(GL_TEXTURE_2D,screen_texture);
     loadTextureParams();
-#ifdef DREAMCAST
-    glKosFinishFrame();
-#endif
     return SDL_TRUE;
 }
 
@@ -187,6 +187,12 @@ void neogeo_adjust_filter(int filter)
 		neo4all_filter=NEO4ALL_FILTER_BILINEAR;
 	else
 		neo4all_filter=NEO4ALL_FILTER_NONE;
+#ifdef DREAMCAST
+	if (filter)
+		neo4all_pvr_filter=NEO4ALL_PVR_FILTER_BILINEAR;
+	else
+		neo4all_pvr_filter=NEO4ALL_PVR_FILTER_NONE;
+#endif
 }
 
 

@@ -4,6 +4,10 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 
+#ifdef DREAMCAST
+#include <GL/glkos.h>
+#endif
+
 #if defined(CACHE_INLINE) && !defined(CACHE_STATIC_INLINE)
 #define CACHE_STATIC_INLINE static __inline__
 #endif
@@ -58,15 +62,22 @@ void neogeo_adjust_filter(int filter);
 void video_reset_gl(void);
 void video_fullscreen_toggle_gl(void);
 
-#ifndef DREAMCAST
 #define NEO4ALL_FILTER_NONE	GL_NEAREST
 #define NEO4ALL_FILTER_BILINEAR GL_LINEAR
-#else
-#define NEO4ALL_FILTER_NONE	GL_FILTER_NONE
-#define NEO4ALL_FILTER_BILINEAR	GL_FILTER_BILINEAR
+
+#ifdef DREAMCAST
+/* gl_poly_cxt.txr.filter (pvr_poly_cxt_t, API PVR nativa) necesita
+   constantes PVR_FILTER_*, no GL_*. neo4all_filter alimenta glTexParameteri()
+   (OpenGL real via GLdc) y necesita GL_NEAREST/GL_LINEAR; neo4all_pvr_filter
+   es la version paralela para los consumidores PVR (sprgl.cpp, draw_fixgl.cpp). */
+#define NEO4ALL_PVR_FILTER_NONE		PVR_FILTER_NONE
+#define NEO4ALL_PVR_FILTER_BILINEAR	PVR_FILTER_BILINEAR
 #endif
 
 extern unsigned neo4all_filter;
+#ifdef DREAMCAST
+extern unsigned neo4all_pvr_filter;
+#endif
 
 extern unsigned ntiles;
 extern unsigned tiles_fail;

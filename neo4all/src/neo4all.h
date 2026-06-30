@@ -15,6 +15,25 @@
 #define bzero(BUF,SIZE) memset(BUF,0,SIZE)
 #endif
 
+#ifdef DREAMCAST
+/* KOS/newlib no implementa swab() (POSIX, unistd.h). Implementacion minima:
+   intercambia bytes pares/impares de 'len' bytes, igual que la version glibc.
+   'inline' (no 'static') para evitar duplicados/ODR al incluirse en varios .cpp. */
+static inline void swab(const void *from, void *to, ssize_t len)
+{
+	const unsigned char *src = (const unsigned char *)from;
+	unsigned char *dst = (unsigned char *)to;
+	ssize_t i;
+
+	for (i = 0; i + 1 < len; i += 2) {
+		unsigned char b0 = src[i];
+		unsigned char b1 = src[i + 1];
+		dst[i]     = b1;
+		dst[i + 1] = b0;
+	}
+}
+#endif
+
 #define REFRESHTIME (1000/60)+1
 
 #define NEOGEO_NB_INTERLACE 240

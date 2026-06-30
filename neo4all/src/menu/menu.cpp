@@ -12,7 +12,9 @@
 #endif
 
 
+#ifdef MENU_MUSIC
 #include <SDL_mixer.h>
+#endif
 #include <SDL_image.h>
 
 #include "menu.h"
@@ -108,7 +110,9 @@ void menu_raise(void)
 	int i;
 	for(i=64;i>=0;i-=4)
 	{
+#ifdef MENU_MUSIC
 		Mix_VolumeMusic(96-(i<<1));
+#endif
 #ifndef DREAMCAST
 		SDL_Delay(10);
 #endif
@@ -123,7 +127,9 @@ void menu_unraise(void)
 	int i;
 	for(i=0;i<=64;i+=4)
 	{
+#ifdef MENU_MUSIC
 		Mix_VolumeMusic(96-(i<<1));
+#endif
 #ifndef DREAMCAST
 		SDL_Delay(10);
 #endif

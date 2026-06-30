@@ -5,7 +5,9 @@ extern uint8 romdisk[];
 #endif
 KOS_INIT_FLAGS(INIT_DEFAULT);
 #if !defined(AES) && defined(SHOW_MENU)
+extern "C" {
 KOS_INIT_ROMDISK(romdisk);
+}
 #else
 #ifdef AES
 #include "mmu_file/mmu_file.h"

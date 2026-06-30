@@ -96,16 +96,12 @@ void blitter(void) {
 	1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #else
-  glClearColor(
-	((float)((video_paletteram_pc[4095]>>0)&0x1F))/31.0,
-	((float)((video_paletteram_pc[4095]>>5)&0x1F))/31.0,
-	((float)((video_paletteram_pc[4095]>>10)&0x1F))/31.0,
-	1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glKosBeginFrame();
   pvr_set_bg_color(
 	((float)((video_paletteram_pc[4095]>>10)&0x1F))/31.0,
 	((float)((video_paletteram_pc[4095]>>5)&0x1F))/31.0,
 	((float)((video_paletteram_pc[4095]>>0)&0x1F))/31.0);
+  glKosFinishList();
 #endif
 
   video_draw_tile_textures();
@@ -115,7 +111,7 @@ void blitter(void) {
 #ifndef DREAMCAST
     SDL_GL_SwapBuffers();
 #else
-    glKosSwapBuffers();
+    glKosFinishFrame();
 #endif
     neo4all_glframes++;
 #endif
@@ -737,6 +733,9 @@ void video_flip(SDL_Surface *surface)
 		console_draw_all_background();
   }
 #endif
+#ifdef DREAMCAST
+  glKosBeginFrame();
+#endif
   glClearColor( 0.0,0.0,0.0, 255.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -758,8 +757,7 @@ void video_flip(SDL_Surface *surface)
   glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
     GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, neo4all_texture_surface);
 #else
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
-    GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, neo4all_texture_surface);
+  glKosTex2D(GL_ARGB1555,512,512,neo4all_texture_surface);
 #endif
 
 #else
@@ -768,8 +766,7 @@ void video_flip(SDL_Surface *surface)
   glTexImage2D(GL_TEXTURE_2D, 0, 3, 512, 512, 0, 
     GL_RGB, GL_UNSIGNED_SHORT_5_6_5, neo4all_texture_surface);
 #else
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, 512, 512, 0, 
-    GL_RGB, GL_UNSIGNED_SHORT_5_6_5, neo4all_texture_surface);
+  glKosTex2D(GL_RGB565,512,512,neo4all_texture_surface);
 #endif
 
 #endif
@@ -796,7 +793,7 @@ void video_flip(SDL_Surface *surface)
 #ifndef DREAMCAST
   SDL_GL_SwapBuffers();
 #else
-  glKosSwapBuffers();
+  glKosFinishFrame();
 #endif
   used_blitter=0;
 #endif
