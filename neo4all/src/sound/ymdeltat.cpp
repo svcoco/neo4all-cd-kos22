@@ -41,7 +41,7 @@ const Sint32 ym_deltat_decode_tableB2[16] = {
     57, 57, 57, 57, 77, 102, 128, 153
 };
 
-/* DELTA-T-ADPCM write register */
+/* DELTA-T-ADPCM write */
 void YM_DELTAT_ADPCM_Write(YM_DELTAT * DELTAT, int r, int v)
 {
     if (r >= 0x10)

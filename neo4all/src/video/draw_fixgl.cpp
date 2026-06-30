@@ -24,7 +24,7 @@ static __inline__ void draw_font(unsigned short *br, unsigned short *paldata, un
 {
     int y;
     for(y=0;y<8;y++) {
-	register unsigned int myword = gfxdata[0];
+	unsigned int myword = gfxdata[0];
 	br[0]=paldata[(myword)&0xf];
 	br[1]=paldata[(myword>>4)&0xf];
 	br[2]=paldata[(myword>>8)&0xf];
@@ -46,13 +46,13 @@ static __inline__ void create_font(unsigned int tileno,int color,unsigned short 
     tiles_fail++;
 #endif
 #if !defined(USE_SQ) && !defined(USE_DMA)
-    register unsigned short *br=_br;
+    unsigned short *br=_br;
 #else
-    register unsigned short *br=(unsigned short*)neo4all_texture_buffer;
+    unsigned short *br=(unsigned short*)neo4all_texture_buffer;
 #endif
 //printf("DRAW_TILE %i, color=0x%X\n",tileno,color);
-    register unsigned short *paldata=(unsigned short *)&video_paletteram_pc[color<<4];
-    register unsigned int *gfxdata = (unsigned int *)&neogeo_fix_memory[tileno<<5];
+    unsigned short *paldata=(unsigned short *)&video_paletteram_pc[color<<4];
+    unsigned int *gfxdata = (unsigned int *)&neogeo_fix_memory[tileno<<5];
 
     paldata[0]=0; // BLEND !!!
 
@@ -108,7 +108,7 @@ void   video_draw_font(unsigned int code, unsigned int color, int sx, int sy)
 {
 //printf("font %i, sx=%i sy=%i, color=%i\n",code,sx,sy,color);
    unsigned ntile=n_tile_list+n_font_list;
-   register unsigned key=((code<<16)|(video_palette_selected+color));
+   unsigned key=((code<<16)|(video_palette_selected+color));
    void *font_buffer=fcache_hash_find(key);
    if (!font_buffer)
    {
@@ -181,11 +181,11 @@ void video_draw_font_textures(void)
 #endif
    for(i=n_tile_list,j=0;j<n_font_list;i++,j++)
    {
-	register void *font_buffer=tile_list[i].buffer;
-	register int sx=tile_list[i].sx;
-	register int sy=tile_list[i].sy;
-	register int zx=8;
-	register int zy=8;
+	void *font_buffer=tile_list[i].buffer;
+	int sx=tile_list[i].sx;
+	int sy=tile_list[i].sy;
+	int zx=8;
+	int zy=8;
 
 #ifndef DREAMCAST
 //	glBindTexture(GL_TEXTURE_2D, tile_opengl_tex[i]);
@@ -227,11 +227,11 @@ void video_draw_font_textures_gl(void)
 
    for(i=n_tile_list,j=0;j<n_font_list;i++,j++)
    {
-	register void *font_buffer=tile_list[i].buffer;
-	register int sx=tile_list[i].sx;
-	register int sy=tile_list[i].sy;
-	register int zx=8;
-	register int zy=8;
+	void *font_buffer=tile_list[i].buffer;
+	int sx=tile_list[i].sx;
+	int sy=tile_list[i].sy;
+	int zx=8;
+	int zy=8;
 	glBindTexture(GL_TEXTURE_2D, screen_texture); //tile_opengl_tex[i]);
 	loadTextureParams();
 #ifndef DREAMCAST

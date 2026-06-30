@@ -192,8 +192,8 @@ void neogeo_adjust_filter(int filter)
 
 void neo4all_black_texture(void)
 {
-	register unsigned *p=(unsigned *)neo4all_black_texture_buffer;
-	register int i;
+	unsigned *p=(unsigned *)neo4all_black_texture_buffer;
+	int i;
 	for(i=0;i<(16*16/2);i++)
 		*p++=0x80008000;
 }

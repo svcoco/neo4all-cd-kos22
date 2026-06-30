@@ -23,9 +23,9 @@ static __inline__ void draw_tile(unsigned short *br, unsigned short *paldata, un
     int y;
     for(y=0;y<16;y++) {
 #ifdef AES
-	register unsigned int myword = gfxdata[0];
+	unsigned int myword = gfxdata[0];
 #else
-	register unsigned int myword = gfxdata[1];
+	unsigned int myword = gfxdata[1];
 #endif
 	br[0]=paldata[(myword>>28)&0xf];
 	br[1]=paldata[(myword>>24)&0xf];
@@ -61,13 +61,13 @@ static __inline__ void create_tile(unsigned int tileno,int color,unsigned short 
     tiles_fail++;
 #endif
 #if !defined(USE_SQ) && !defined(USE_DMA)
-    register unsigned short *br=_br;
+    unsigned short *br=_br;
 #else
-    register unsigned short *br=(unsigned short*)neo4all_texture_buffer;
+    unsigned short *br=(unsigned short*)neo4all_texture_buffer;
 #endif
 //printf("DRAW_TILE %i\n",tileno);
-    register unsigned short *paldata=(unsigned short *)&video_paletteram_pc[color<<4];
-    register unsigned int *gfxdata = (unsigned int *)&neogeo_spr_memory[tileno<<7];
+    unsigned short *paldata=(unsigned short *)&video_paletteram_pc[color<<4];
+    unsigned int *gfxdata = (unsigned int *)&neogeo_spr_memory[tileno<<7];
 
     paldata[0]=0; // BLEND !!!
     draw_tile(br,paldata,gfxdata);
@@ -131,7 +131,7 @@ void   video_draw_spr(unsigned int code, unsigned int color, int flipx,
   zx++;
 //  if (zx==15) zx=16;
 
-   register unsigned key=((code<<16)|(video_palette_selected+color));
+   unsigned key=((code<<16)|(video_palette_selected+color));
    void *texture_buffer=tcache_hash_find(key);
    if (!texture_buffer)
    {
@@ -178,11 +178,11 @@ void video_draw_tile_textures(void)
 #endif
    for(i=0;i<n_tile_list;i++)
    {
-	register void *texture_buffer=tile_list[i].buffer;
-	register int sx=tile_list[i].sx;
-	register int sy=tile_list[i].sy;
-	register int zx=tile_list[i].zx;
-	register int zy=tile_list[i].zy;
+	void *texture_buffer=tile_list[i].buffer;
+	int sx=tile_list[i].sx;
+	int sy=tile_list[i].sy;
+	int zx=tile_list[i].zx;
+	int zy=tile_list[i].zy;
 #ifndef DREAMCAST
 //	glBindTexture(GL_TEXTURE_2D, tile_opengl_tex[i]);
 	loadTextureParams();
@@ -239,11 +239,11 @@ void video_draw_tile_textures_gl(void)
 
    for(i=0;i<n_tile_list;i++)
    {
-	register void *texture_buffer=tile_list[i].buffer;
-	register int sx=tile_list[i].sx;
-	register int sy=tile_list[i].sy;
-	register int zx=tile_list[i].zx;
-	register int zy=tile_list[i].zy;
+	void *texture_buffer=tile_list[i].buffer;
+	int sx=tile_list[i].sx;
+	int sy=tile_list[i].sy;
+	int zx=tile_list[i].zx;
+	int zy=tile_list[i].zy;
 
 	glBindTexture(GL_TEXTURE_2D, screen_texture); //tile_opengl_tex[i]);
 	loadTextureParams();

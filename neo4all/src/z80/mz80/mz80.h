@@ -284,7 +284,7 @@ struct mz80context
 	UINT8 z80intPending;
 } RETRO_PACKED ;
 
-// These are the enumerations used for register access. DO NOT ALTER THEIR
+// These are the enumerations used for access. DO NOT ALTER THEIR
 // ORDER! It must match the same order as in the mz80.c/mz80.asm files!
 
 enum

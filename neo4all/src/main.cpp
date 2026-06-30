@@ -950,8 +950,8 @@ void	neogeo_run(void)
 				// Execute Z80 timeslice (one VBL)
 				_z80raise(0);
 				{
-    				register int	i;
-				register int zc=neo4all_z80_cycles/NEOGEO_NB_INTERLACE;
+    				int	i;
+				int zc=neo4all_z80_cycles/NEOGEO_NB_INTERLACE;
 				for (i = 0; i < NEOGEO_NB_INTERLACE; i++) {
 					_z80exec(zc);
 					my_timer();
@@ -974,9 +974,9 @@ void	neogeo_run(void)
 		else
 		{
 			_z80raise(0);
-			register int i;
-			register int zc=neo4all_z80_cycles/NEOGEO_NB_INTERLACE;
-			register int mc=neo4all_68k_cycles/NEOGEO_NB_INTERLACE;
+			int i;
+			int zc=neo4all_z80_cycles/NEOGEO_NB_INTERLACE;
+			int mc=neo4all_68k_cycles/NEOGEO_NB_INTERLACE;
 			for (i = 0; i < NEOGEO_NB_INTERLACE ; i++)
 			{
 				_68k_emulate(mc);

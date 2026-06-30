@@ -59,7 +59,7 @@ static volatile unsigned short *jz_emcregs;
 
 static int sdram_convert(unsigned int pllin,unsigned int *sdram_freq)
 {
-	register unsigned int ns, tmp;
+	unsigned int ns, tmp;
  
 	ns = 1000000000 / pllin;
 	/* Set refresh registers */
@@ -75,7 +75,7 @@ static int sdram_convert(unsigned int pllin,unsigned int *sdram_freq)
  
 static void pll_init(unsigned int clock)
 {
-	register unsigned int cfcr, plcr1;
+	unsigned int cfcr, plcr1;
 	unsigned int sdramclock = 0;
 	int n2FR[33] = {
 		0, 0, 1, 2, 3, 0, 4, 0, 5, 0, 0, 0, 6, 0, 0, 0,

@@ -44,7 +44,7 @@ static void IRQHandler(int n, int irq)
 /* Timer overflow callback from timer.c */
 void timer_callback_2610(int param)
 {
-    register int c = param;
+    int c = param;
 
     Timer[c] = 0;
     YM2610TimerOver(c);
@@ -61,7 +61,7 @@ static void TimerHandler(int c, int count, double stepTime)
 	}
     } else {			/* Start FM Timer */
 	if (Timer[c] == 0) {
-	    register double timeSec = (double) count * stepTime;
+	    double timeSec = (double) count * stepTime;
 	    Timer[c] =
 		(timer_struct *) insert_timer(timeSec, c);
 	}

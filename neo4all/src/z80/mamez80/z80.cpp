@@ -33,7 +33,7 @@
  *	 - added methods to access and override the cycle count tables
  *	 - fixed handling and timing of multiple DD/FD prefixed opcodes
  *	 Changes in 2.8:
- *	 - OUTI/OUTD/OTIR/OTDR also pre-decrement the B register now.
+ *	 - OUTI/OUTD/OTIR/OTDR also pre-decrement the B now.
  *	   This was wrong because of a bug fix on the wrong side
  *	   (astrocade sound driver).
  *	 Changes in 2.7:
@@ -45,7 +45,7 @@
  *		Thanks to Sean Young for finding this nasty bug.
  *	 Changes in 2.5:
  *	  - Burning cycles always adjusts the ICount by a multiple of 4.
- *	  - In REPEAT_AT_ONCE cases the R register wasn't incremented twice
+ *	  - In REPEAT_AT_ONCE cases the R wasn't incremented twice
  *		per repetition as it should have been. Those repeated opcodes
  *		could also underflow the ICount.
  *	  - Simplified TIME_LOOP_HACKS for BC and added two more for DE + HL
@@ -58,7 +58,7 @@
  *	  - External termination of the execution loop calls z80_burn() and
  *		z80_vm_burn() to burn an amount of cycles (R adjustment)
  *	  - Shortcuts which burn CPU cycles (BUSY_LOOP_HACKS and TIME_LOOP_HACKS)
- *		now also adjust the R register depending on the skipped opcodes.
+ *		now also adjust the R depending on the skipped opcodes.
  *	 Changes in 2.2:
  *	  - Fixed bugs in CPL, SCF and CCF instructions flag handling.
  *	  - Changed variable EA and ARG16() function to UINT32; this
@@ -131,7 +131,7 @@ static UINT8 z80_reg_layout[] = {
 };
 
 static UINT8 z80_win_layout[] = {
-	27, 0,53, 4,	/* register window (top rows) */
+	27, 0,53, 4,	/* window (top rows) */
 	 0, 0,26,22,	/* disassembler window (left colums) */
 	27, 5,53, 8,	/* memory #1 window (right, upper middle) */
 	27,14,53, 8,	/* memory #2 window (right, lower middle) */
@@ -140,7 +140,7 @@ static UINT8 z80_win_layout[] = {
 
 /****************************************************************************/
 /* The Z80 registers. HALT is set to 1 when the CPU is halted, the refresh	*/
-/* register is calculated as follows: refresh=(Regs.R&127)|(Regs.R2&128)	*/
+/* is calculated as follows: refresh=(Regs.R&127)|(Regs.R2&128)	*/
 /****************************************************************************/
 typedef struct {
 /* 00 */	PAIR	PREPC,PC,SP,AF,BC,DE,HL,IX,IY;
@@ -2647,7 +2647,7 @@ OP(illegal,1) {
 }
 
 /**********************************************************
- * IX register related opcodes (DD prefix)
+ * IX related opcodes (DD prefix)
  **********************************************************/
 OP(dd,00) { illegal_1(); op_00();									} /* DB   DD		  */
 OP(dd,01) { illegal_1(); op_01();									} /* DB   DD		  */
@@ -2938,7 +2938,7 @@ OP(dd,fe) { illegal_1(); op_fe();									} /* DB   DD		  */
 OP(dd,ff) { illegal_1(); op_ff();									} /* DB   DD		  */
 
 /**********************************************************
- * IY register related opcodes (FD prefix)
+ * IY related opcodes (FD prefix)
  **********************************************************/
 OP(fd,00) { illegal_1(); op_00();									} /* DB   FD		  */
 OP(fd,01) { illegal_1(); op_01();									} /* DB   FD		  */
@@ -4256,7 +4256,7 @@ int z80_execute(int cycles)
 }
 
 /****************************************************************************
- * Burn 'cycles' T-states. Adjust R register for the lost time
+ * Burn 'cycles' T-states. Adjust R for the lost time
  ****************************************************************************/
 #ifdef Z80_MSX
 void z80_msx_burn(int cycles)

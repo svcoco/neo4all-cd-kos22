@@ -67,7 +67,7 @@ enum
 
 enum
 {
-        MAX_REGS = 128,                         /* maximum number of register of any CPU */
+        MAX_REGS = 128,                         /* maximum number of of any CPU */
 
         /* This value is passed to activecpu_get_reg to retrieve the previous
          * program counter value, ie. before a CPU emulation started

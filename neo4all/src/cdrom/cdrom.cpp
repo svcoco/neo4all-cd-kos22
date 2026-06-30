@@ -910,7 +910,7 @@ void extract8(char *src, char *dst)
 //----------------------------------------------------------------------------
 void spr_conv(unsigned char *src, unsigned char *dst, int len, unsigned char *usage_ptr)
 {
-    register int    i;
+    int    i;
     int offset;
 
     for(i=0;i<len;i+=4) {

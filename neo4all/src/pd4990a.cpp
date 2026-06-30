@@ -287,7 +287,7 @@ static void pd4990a_process_command(void)
 {
   switch(pd4990a_getcommand())
   {
-    case 0x1:	/*load output register */
+    case 0x1:	/*load output */
       bitno=0;
       if(reading)
 	pd4990a_readbit();	/*prepare first bit */
@@ -295,7 +295,7 @@ static void pd4990a_process_command(void)
       shifthi=0;
       break;
     case 0x2:
-      writing=0;	/*store register to current date */
+      writing=0;	/*store to current date */
       pd4990a_update_date();
       break;
       case 0x3:	/*start reading */

@@ -13583,7 +13583,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x06:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80B = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80B = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x07:
@@ -13665,7 +13665,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x0e:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80C = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80C = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x0f:
@@ -13750,7 +13750,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x16:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80D = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80D = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x17:
@@ -13836,7 +13836,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x1e:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80E = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80E = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x1f:
@@ -13926,7 +13926,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x26:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80H = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80H = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x27:
@@ -14021,7 +14021,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x2e:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80L = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80L = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x2f:
@@ -14321,7 +14321,7 @@ UINT32 mz80exec(UINT32 dwCycles)
 			case 0x3e:
 			{
 				sdwCyclesRemaining -= 7;
-				cpu.z80A = *pbPC++;	/* Get immediate byte into register */
+				cpu.z80A = *pbPC++;	/* Get immediate byte into */
 				break;
 			}
 			case 0x3f:

@@ -517,10 +517,10 @@ void write_text_sel(int x, int y, int w, char * str)
 		h=text_screen->h-y8;
 	if (y8<text_screen->h)
 	{
-		register Uint16 *buf=(Uint16 *)text_screen->pixels;
+		Uint16 *buf=(Uint16 *)text_screen->pixels;
 		buf=(Uint16 *)&buf[x8+(y8*(text_screen->pitch/2))];
-		register unsigned dx=(text_screen->pitch/2)-w;
-		register int wmax=w/2;
+		unsigned dx=(text_screen->pitch/2)-w;
+		int wmax=w/2;
 		for(j=0;j<h;j++,buf+=dx)
 		{
 			for(i=0;i<wmax;i++,buf++)
@@ -669,10 +669,10 @@ void text_draw_window(int x, int y, int w, int h, char *title)
 		h=text_screen->h-y;
 	if (y<text_screen->h)
 	{
-		register Uint16 *buf=(Uint16 *)text_screen->pixels;
+		Uint16 *buf=(Uint16 *)text_screen->pixels;
 		buf=(Uint16 *)&buf[x+(y*(text_screen->pitch/2))];
-		register unsigned dx=(text_screen->pitch/2)-w;
-		register int wmax=w/2;
+		unsigned dx=(text_screen->pitch/2)-w;
+		int wmax=w/2;
 		for(j=0;j<h;j++,buf+=dx)
 		{
 			for(i=0;i<wmax;i++,buf++)

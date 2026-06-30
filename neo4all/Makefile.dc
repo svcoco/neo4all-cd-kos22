@@ -20,12 +20,15 @@ endif
 TARGET = $(NAME)
 
 ifdef AES
-KOS_CFLAGS= -Isrc/mmu_file/kos-patch/kernel/arch/dreamcast/include -O3 -fomit-frame-pointer -ml -m4-single-only -fno-optimize-sibling-calls -I$(KOS_BASE)/include -I$(KOS_BASE)/addons/include -I$(KOS_BASE)/kernel/arch/dreamcast/include -D_arch_dreamcast -D_arch_sub_pristine -Wall -g -fno-builtin -fno-strict-aliasing
-
-KOS_LDFLAGS = -Lsrc/mmu_file/kos-patch/lib/dreamcast -Lsrc/mmu_file/kos-patch/addons/lib/dreamcast -ml -m4-single-only -Wl,-Ttext=0x8c010000 -nostartfiles -nostdlib -L$(KOS_BASE)/lib/dreamcast -L$(KOS_BASE)/addons/lib/dreamcast
+KOS_CFLAGS+= -O3 -fomit-frame-pointer -fno-optimize-sibling-calls \
+             -fno-builtin -fno-strict-aliasing -DUSE_SQ_MMU
+KOS_LDFLAGS+= -ml -m4-single-only -Wl,-Ttext=0x8c010000 \
+              -nostartfiles -nostdlib \
+              -L$(KOS_BASE)/lib/dreamcast \
+              -L$(KOS_PORTS)/lib
 endif
 
-KOS_CFLAGS+= -I$(KOS_BASE)/addons/include/SDL -I$(KOS_BASE)/addons/include
+KOS_CFLAGS+= -I$(KOS_PORTS)/include/SDL -I$(KOS_PORTS)/include
 
 INLINE='static __inline__'
 
@@ -42,6 +45,8 @@ endif
 endif
 
 KOS_CFLAGS+=$(NEO4ALL_CFLAGS)
+# Silenciar warnings de código legacy — quitar cuando todo compile limpio:
+KOS_CFLAGS+= -Wno-write-strings -Wno-narrowing -Wno-deprecated-declarations
 KOS_CPPFLAGS+=$(KOS_CFLAGS)
 
 all: $(TARGET).elf
@@ -54,14 +59,15 @@ src/z80/faze/raze.s: src/z80/faze/raze.s.m4
 src/z80/faze/raze.o: src/z80/faze/raze.s
 
 ifdef VIDEOGL
-LIB_SDL= -lSDL_mixer_126 -lSDL_image_124 -lSDL_gl_1213 -lkglx -lpng_128 -lz_123
+LIB_SDL= -lSDL_image -lSDL -lGL -lpng -lz
 else
-LIB_SDL= -lSDL_mixer_126 -lSDL_image_124 -lSDL_1213 -lpng_128 -lz_123
+LIB_SDL= -lSDL_image -lSDL -lpng -lz
 endif
 
 $(TARGET).elf: $(OBJS) $(Z80_OBJS) $(MEMORY_OBJ) $(OBJS_68K)
 	$(KOS_CC) $(KOS_CFLAGS) $(KOS_LDFLAGS) -o $(TARGET).elf $(KOS_START) \
-	$(OBJS) $(OBJS_68K) $(MEMORY_OBJ) $(Z80_OBJS) $(LIB_SDL) $(OBJEXTRA) -lm $(KOS_LIBS)
+	$(OBJS) $(OBJS_68K) $(MEMORY_OBJ) $(Z80_OBJS) \
+	-L$(KOS_PORTS)/lib $(LIB_SDL) $(OBJEXTRA) -lm $(KOS_LIBS)
 
 $(TARGET).bin: $(TARGET).elf
 	$(KOS_OBJCOPY) -R .stack -O binary $(TARGET).elf $(TARGET).bin

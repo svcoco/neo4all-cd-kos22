@@ -10784,14 +10784,14 @@ void m68k_op_moves_8_ai(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -10819,14 +10819,14 @@ void m68k_op_moves_8_pi(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -10854,14 +10854,14 @@ void m68k_op_moves_8_pi7(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -10889,14 +10889,14 @@ void m68k_op_moves_8_pd(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -10924,14 +10924,14 @@ void m68k_op_moves_8_pd7(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -10959,14 +10959,14 @@ void m68k_op_moves_8_di(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -10994,14 +10994,14 @@ void m68k_op_moves_8_ix(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11029,14 +11029,14 @@ void m68k_op_moves_8_aw(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11064,14 +11064,14 @@ void m68k_op_moves_8_al(void)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11099,14 +11099,14 @@ void m68k_op_moves_16_ai(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11134,14 +11134,14 @@ void m68k_op_moves_16_pi(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11169,14 +11169,14 @@ void m68k_op_moves_16_pd(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11204,14 +11204,14 @@ void m68k_op_moves_16_di(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11239,14 +11239,14 @@ void m68k_op_moves_16_ix(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11274,14 +11274,14 @@ void m68k_op_moves_16_aw(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11309,14 +11309,14 @@ void m68k_op_moves_16_al(void)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11346,7 +11346,7 @@ void m68k_op_moves_32_ai(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11376,7 +11376,7 @@ void m68k_op_moves_32_pi(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11406,7 +11406,7 @@ void m68k_op_moves_32_pd(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11436,7 +11436,7 @@ void m68k_op_moves_32_di(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11466,7 +11466,7 @@ void m68k_op_moves_32_ix(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11496,7 +11496,7 @@ void m68k_op_moves_32_aw(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -11526,7 +11526,7 @@ void m68k_op_moves_32_al(void)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);

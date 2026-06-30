@@ -47,8 +47,8 @@ timer_struct *insert_timer(double duration, int param)
 
 
 void free_all_timer(void) {
-	register int i;
-	register timer_struct *t=(timer_struct *)&timers[0];
+	int i;
+	timer_struct *t=(timer_struct *)&timers[0];
 	for (i = 0; i < MAX_TIMER; i++, t++)
 		t->del_it=1;
 	initted=1;
@@ -74,10 +74,10 @@ void adjust_timer(unsigned z80_cycles)
 
 void my_timer(void)
 {
-    register int i;
-    register timer_struct *t=(timer_struct *)&timers[0];
+    int i;
+    timer_struct *t=(timer_struct *)&timers[0];
     neogeo_timer_count += timer_inc;		/* 16ms par frame */
-    register double cnt=neogeo_timer_count;
+    double cnt=neogeo_timer_count;
     for (i = 0; i < MAX_TIMER; i++,t++) {
 	if (cnt >= t->time && t->del_it == 0) {
 	    timer_callback_2610(t->param);

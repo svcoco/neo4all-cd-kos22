@@ -555,7 +555,7 @@
 /*
  * The general instruction format follows this pattern:
  * .... XXX. .... .YYY
- * where XXX is register X and YYY is register Y
+ * where XXX is X and YYY is Y
  */
 /* Data Register Isolation */
 #define DX (REG_D[(REG_IR >> 9) & 7])
@@ -566,7 +566,7 @@
 
 
 /* Effective Address Calculations */
-#define EA_AY_AI_8()   AY                                    /* address register indirect */
+#define EA_AY_AI_8()   AY                                    /* address indirect */
 #define EA_AY_AI_16()  EA_AY_AI_8()
 #define EA_AY_AI_32()  EA_AY_AI_8()
 #define EA_AY_PI_8()   (AY++)                                /* postincrement (size = byte) */
@@ -715,14 +715,14 @@
 #define COND_XC() (!COND_XS)
 
 
-/* Get the condition code register */
+/* Get the condition code */
 #define m68ki_get_ccr() ((COND_XS() >> 4) | \
 						 (COND_MI() >> 4) | \
 						 (COND_EQ() << 2) | \
 						 (COND_VS() >> 6) | \
 						 (COND_CS() >> 8))
 
-/* Get the status register */
+/* Get the status */
 #define m68ki_get_sr() ( FLAG_T1              | \
 						 FLAG_T0              | \
 						(FLAG_S        << 11) | \
@@ -813,7 +813,7 @@ typedef struct
 	uint pref_addr;    /* Last prefetch address */
 	uint pref_data;    /* Data in the prefetch queue */
 	uint address_mask; /* Available address pins */
-	uint sr_mask;      /* Implemented status register bits */
+	uint sr_mask;      /* Implemented status bits */
 	uint instr_mode;   /* Stores whether we are in instruction mode or group 0/1 exception mode */
 	uint run_mode;     /* Stores whether we are processing a reset, bus error, address error, or something else */
 
@@ -939,12 +939,12 @@ INLINE void m68ki_branch_8(uint offset);
 INLINE void m68ki_branch_16(uint offset);
 INLINE void m68ki_branch_32(uint offset);
 
-/* Status register operations. */
+/* Status operations. */
 INLINE void m68ki_set_s_flag(uint value);            /* Only bit 2 of value should be set (i.e. 4 or 0) */
 INLINE void m68ki_set_sm_flag(uint value);           /* only bits 1 and 2 of value should be set */
-INLINE void m68ki_set_ccr(uint value);               /* set the condition code register */
-INLINE void m68ki_set_sr(uint value);                /* set the status register */
-INLINE void m68ki_set_sr_noint(uint value);          /* set the status register */
+INLINE void m68ki_set_ccr(uint value);               /* set the condition code */
+INLINE void m68ki_set_sr(uint value);                /* set the status */
+INLINE void m68ki_set_sr_noint(uint value);          /* set the status */
 
 /* Exception processing */
 INLINE uint m68ki_init_exception(void);              /* Initial exception processing */
@@ -1152,9 +1152,9 @@ INLINE uint m68ki_get_ea_pcix(void)
  */
 INLINE uint m68ki_get_ea_ix(uint An)
 {
-	/* An = base register */
+	/* An = base */
 	uint extension = m68ki_read_imm_16();
-	uint Xn = 0;                        /* Index register */
+	uint Xn = 0;                        /* Index */
 	uint bd = 0;                        /* Base Displacement */
 	uint od = 0;                        /* Outer Displacement */
 
@@ -1165,7 +1165,7 @@ INLINE uint m68ki_get_ea_ix(uint An)
 		if(!BIT_B(extension))           /* W/L */
 			Xn = MAKE_INT_16(Xn);
 
-		/* Add base register and displacement and return */
+		/* Add base and displacement and return */
 		return An + Xn + MAKE_INT_8(extension);
 	}
 
@@ -1180,7 +1180,7 @@ INLINE uint m68ki_get_ea_ix(uint An)
 		if(CPU_TYPE_IS_EC020_PLUS(CPU_TYPE))
 			Xn <<= (extension>>9) & 3;  /* SCALE */
 
-		/* Add base register and displacement and return */
+		/* Add base and displacement and return */
 		return An + Xn + MAKE_INT_8(extension);
 	}
 
@@ -1188,7 +1188,7 @@ INLINE uint m68ki_get_ea_ix(uint An)
 
 	USE_CYCLES(m68ki_ea_idx_cycle_table[extension&0x3f]);
 
-	/* Check if base register is present */
+	/* Check if base is present */
 	if(BIT_7(extension))                /* BS */
 		An = 0;                         /* An */
 
@@ -1406,7 +1406,7 @@ INLINE void m68ki_set_sm_flag_nosp(uint value)
 }
 
 
-/* Set the condition code register */
+/* Set the condition code */
 INLINE void m68ki_set_ccr(uint value)
 {
 	FLAG_X = BIT_4(value)  << 4;
@@ -1416,13 +1416,13 @@ INLINE void m68ki_set_ccr(uint value)
 	FLAG_C = BIT_0(value)  << 8;
 }
 
-/* Set the status register but don't check for interrupts */
+/* Set the status but don't check for interrupts */
 INLINE void m68ki_set_sr_noint(uint value)
 {
 	/* Mask out the "unimplemented" bits */
 	value &= CPU_SR_MASK;
 
-	/* Now set the status register */
+	/* Now set the status */
 	FLAG_T1 = BIT_F(value);
 	FLAG_T0 = BIT_E(value);
 	FLAG_INT_MASK = value & 0x0700;
@@ -1430,7 +1430,7 @@ INLINE void m68ki_set_sr_noint(uint value)
 	m68ki_set_sm_flag((value >> 11) & 6);
 }
 
-/* Set the status register but don't check for interrupts nor
+/* Set the status but don't check for interrupts nor
  * change the stack pointer
  */
 INLINE void m68ki_set_sr_noint_nosp(uint value)
@@ -1438,7 +1438,7 @@ INLINE void m68ki_set_sr_noint_nosp(uint value)
 	/* Mask out the "unimplemented" bits */
 	value &= CPU_SR_MASK;
 
-	/* Now set the status register */
+	/* Now set the status */
 	FLAG_T1 = BIT_F(value);
 	FLAG_T0 = BIT_E(value);
 	FLAG_INT_MASK = value & 0x0700;
@@ -1446,7 +1446,7 @@ INLINE void m68ki_set_sr_noint_nosp(uint value)
 	m68ki_set_sm_flag_nosp((value >> 11) & 6);
 }
 
-/* Set the status register and check for interrupts */
+/* Set the status and check for interrupts */
 INLINE void m68ki_set_sr(uint value)
 {
 	m68ki_set_sr_noint(value);
@@ -1459,7 +1459,7 @@ INLINE void m68ki_set_sr(uint value)
 /* Initiate exception processing */
 INLINE uint m68ki_init_exception(void)
 {
-	/* Save the old status register */
+	/* Save the old status */
 	uint sr = m68ki_get_sr();
 
 	/* Turn off trace flag, clear pending traces */

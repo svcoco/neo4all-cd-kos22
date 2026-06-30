@@ -41,7 +41,7 @@ struct AY8910 {
     unsigned int VolTable[32];
 };
 
-/* register id's */
+/* id's */
 #define AY_AFINE	(0)
 #define AY_ACOARSE	(1)
 #define AY_BFINE	(2)
@@ -232,7 +232,7 @@ void _AYWriteReg(int r, int v)
 }
 
 
-/* write a register on the AY8910 chip */
+/* write a on the AY8910 chip */
 void AYWriteReg(int r, int v)
 {
     if (r > 15)
@@ -483,7 +483,7 @@ void AY8910Update(int param, Sint16 ** buffer, int length)
 		}
 
 		/* The Random Number Generator of the 8910 is a 17-bit shift */
-		/* register. The input to the shift register is bit0 XOR bit2 */
+		/* register. The input to the shift is bit0 XOR bit2 */
 		/* (bit0 is the output). */
 
 		/* The following is a fast way to compute bit 17 = bit0^bit2. */

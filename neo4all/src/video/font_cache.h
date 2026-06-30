@@ -34,7 +34,7 @@ void fcache_hash_init(void);
 #else
 CACHE_STATIC_INLINE void fcache_hash_init(void)
 {
-	register unsigned i;
+	unsigned i;
 	for(i=0;i<FCACHE_HASH_SIZE;i++)
 		fcache_hash_table[i]=NULL;
 	for(i=0;i<FCACHE_SIZE;i++)
@@ -57,15 +57,15 @@ CACHE_STATIC_INLINE void fcache_hash_old_cleaner(int n_frame)
 #ifdef DEBUG_GL
     	puts("FONT cache Cleaner");
 #endif
-	register unsigned breaktime=neo4all_glframes-n_frame;
-	register unsigned i;
+	unsigned breaktime=neo4all_glframes-n_frame;
+	unsigned i;
 	for(i=0;i<FCACHE_HASH_SIZE;i++)
 	{
-		register fcache_node_t *p=fcache_hash_table[i];
-		register fcache_node_t *p0=p;
+		fcache_node_t *p=fcache_hash_table[i];
+		fcache_node_t *p0=p;
 		while(p)
 		{
-			register fcache_node_t *next=p->next;
+			fcache_node_t *next=p->next;
 			if (p->used < breaktime)
 			{
 				p->next=NULL;
@@ -97,14 +97,14 @@ void fcache_hash_pal_cleaner(void);
 #else
 CACHE_STATIC_INLINE void fcache_hash_pal_cleaner(void)
 {
-	register unsigned i;
+	unsigned i;
 	for(i=0;i<FCACHE_HASH_SIZE;i++)
 	{
-		register fcache_node_t *p=fcache_hash_table[i];
-		register fcache_node_t *p0=p;
+		fcache_node_t *p=fcache_hash_table[i];
+		fcache_node_t *p0=p;
 		while(p)
 		{
-			register fcache_node_t *next=p->next;
+			fcache_node_t *next=p->next;
 			if (video_palette_use[p->col])
 			{
 				p->next=NULL;
@@ -137,7 +137,7 @@ fcache_rec_t fcache_hash_insert(unsigned key);
 #else
 CACHE_STATIC_INLINE fcache_rec_t fcache_hash_insert(unsigned key)
 {
-	register unsigned bucket=fcache_hash(key);
+	unsigned bucket=fcache_hash(key);
 	
 	if (!first_font)
 	{
@@ -153,7 +153,7 @@ CACHE_STATIC_INLINE fcache_rec_t fcache_hash_insert(unsigned key)
 		}
 	}
 	{
-	register fcache_node_t *p, *p0;
+	fcache_node_t *p, *p0;
 	p=first_font;
 	first_font=p->next;
 	p0=fcache_hash_table[bucket];
@@ -175,8 +175,8 @@ int fcache_hash_delete(unsigned key);
 #else
 CACHE_STATIC_INLINE int fcache_hash_delete(unsigned key)
 {
-	register fcache_node_t *p0=NULL, *p;
-	register unsigned bucket=fcache_hash(key);
+	fcache_node_t *p0=NULL, *p;
+	unsigned bucket=fcache_hash(key);
 	p=fcache_hash_table[bucket];
 	while (p && !fcache_compEq(p->key,key))
 	{
@@ -209,7 +209,7 @@ fcache_rec_t fcache_hash_find(unsigned key);
 #else
 CACHE_STATIC_INLINE fcache_rec_t fcache_hash_find(unsigned key)
 {
-	register fcache_node_t *p;
+	fcache_node_t *p;
 
 	p = fcache_hash_table[fcache_hash(key)];
 	while (p && !fcache_compEq(p->key, key))
@@ -226,8 +226,8 @@ unsigned fcache_hash_unused(void);
 #else
 CACHE_STATIC_INLINE unsigned fcache_hash_unused(void)
 {
-	register unsigned ret=0;
-	register fcache_node_t *p=first_font;
+	unsigned ret=0;
+	fcache_node_t *p=first_font;
 	while(p)
 	{
 		ret++;

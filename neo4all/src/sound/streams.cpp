@@ -82,9 +82,9 @@ int streams_sh_start(void)
 
 static __inline__ void mixaudio(Sint16 *dst, const Sint16 *src, Uint32 len)
 {
-	register unsigned l=len;
+	unsigned l=len;
 	while ( l-- ) {
-		register int dst_sample=(*src++)+(*dst);
+		int dst_sample=(*src++)+(*dst);
 		if (dst_sample>MAX_AUDIOVAL)
 			dst_sample=MAX_AUDIOVAL;
 		else if (dst_sample<MIN_AUDIOVAL)
@@ -112,9 +112,9 @@ void streamupdate(int len)
 
 	    if (stream_joined_channels[channel] > 1) {
 		    {
-		    	register int i;
-		    	register Sint16 **buf=tmp_sound_buf;
-			register int max=stream_joined_channels[channel];
+		    	int i;
+		    	Sint16 **buf=tmp_sound_buf;
+			int max=stream_joined_channels[channel];
 		    	for (i = 0; i < max; i++)
 				*buf++ = stream[channel + i].buffer;
 		    }
@@ -129,10 +129,10 @@ void streamupdate(int len)
 	 channel += stream_joined_channels[channel]) {
 
 	if (stream[channel].buffer) {
-	    register int i;
-	    register Uint16 *bl=left_buffer;
-	    register Uint16 *br=right_buffer;
-	    register int max=stream_joined_channels[channel];
+	    int i;
+	    Uint16 *bl=left_buffer;
+	    Uint16 *br=right_buffer;
+	    int max=stream_joined_channels[channel];
 	    for (i = 0; i < max; i++) {
 
 		if (SamplePan[channel + i] <= 128)
@@ -147,11 +147,11 @@ void streamupdate(int len)
     SDL_LockAudio();
 #endif
     {
-    	register Uint16 *pl = play_buffer;
-	register Uint16 *bl = left_buffer;
-	register Uint16 *br = right_buffer;
-	register int i;
-	register int max = len >> 2;
+    	Uint16 *pl = play_buffer;
+	Uint16 *bl = left_buffer;
+	Uint16 *br = right_buffer;
+	int i;
+	int max = len >> 2;
     	for (i = 0; i < max; ++i) {
 		*pl++ = *bl++;
 		*pl++ = *br++;

@@ -153,13 +153,13 @@ const char* g_version = "3.3";
 enum
 {
 	EA_MODE_NONE,	/* No special addressing mode */
-	EA_MODE_AI,		/* Address register indirect */
-	EA_MODE_PI,		/* Address register indirect with postincrement */
-	EA_MODE_PI7,	/* Address register 7 indirect with postincrement */
-	EA_MODE_PD,		/* Address register indirect with predecrement */
-	EA_MODE_PD7,	/* Address register 7 indirect with predecrement */
-	EA_MODE_DI,		/* Address register indirect with displacement */
-	EA_MODE_IX,		/* Address register indirect with index */
+	EA_MODE_AI,		/* Address indirect */
+	EA_MODE_PI,		/* Address indirect with postincrement */
+	EA_MODE_PI7,	/* Address 7 indirect with postincrement */
+	EA_MODE_PD,		/* Address indirect with predecrement */
+	EA_MODE_PD7,	/* Address 7 indirect with predecrement */
+	EA_MODE_DI,		/* Address indirect with displacement */
+	EA_MODE_IX,		/* Address indirect with index */
 	EA_MODE_AW,		/* Absolute word */
 	EA_MODE_AL,		/* Absolute long */
 	EA_MODE_PCDI,	/* Program counter indirect with displacement */

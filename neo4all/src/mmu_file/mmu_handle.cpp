@@ -61,7 +61,7 @@ static volatile unsigned * const mmu_handle_mmucr = (unsigned *)(0xff000010);
 #ifdef MMU_HANDLE_USE_REAL_HANDLER
 #ifdef __cplusplus
 extern "C" {
-static void mmu_handle_real_handler(irq_t source, irq_context_t *context);
+static void mmu_handle_real_handler(irq_exception_t source, irq_context_t *context);
 }
 #endif
 #endif
@@ -317,12 +317,12 @@ void mmu_handle_find_slice(unsigned orig_vp)
 static mmupage_t * mmu_handle_handler(mmucontext_t * c, int _vp) {
 	return NULL;
 }
-static void mmu_handle_real_handler(irq_t source, irq_context_t *context) {
-	register unsigned _vp= (*mmu_handle_tea)>>PAGESIZE_BITS;
+static void mmu_handle_real_handler(irq_exception_t source, irq_context_t *context) {
+	unsigned _vp= (*mmu_handle_tea)>>PAGESIZE_BITS;
 #else
 static mmupage_t * mmu_handle_handler(mmucontext_t * c, int _vp) {
 #endif
-	register unsigned vp=_vp&0x7FFFF;
+	unsigned vp=_vp&0x7FFFF;
 #ifdef MMU_HANDLE_DEBUG
 	if (c!=mmu_handle_ctx)
 	{
@@ -351,7 +351,7 @@ static mmupage_t * mmu_handle_handler(mmucontext_t * c, int _vp) {
 		return (mmupage_t *)NULL;
 	}
 #else
-	register mmupage_t *p=&(((mmusubcontext_t *)mmu_handle_ctx->sub[vp>>9])->page[vp&0x1ff]);
+	mmupage_t *p=&(((mmusubcontext_t *)mmu_handle_ctx->sub[vp>>9])->page[vp&0x1ff]);
 #endif
 
 #ifdef MMU_HANDLE_EXTRA_DEBUG
@@ -892,7 +892,7 @@ void mmu_handle_inc_frame(void)
 
 void mmu_handle_flush(void)
 {
-	register uint32 status;
+	uint32 status;
 	status = *mmu_handle_mmucr;
 	status |= 0x04;
 	*mmu_handle_mmucr = status;

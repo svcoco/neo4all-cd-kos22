@@ -60,8 +60,8 @@ must fix:
  * For C and D where nothing is specified, use "."
  *
  * Example:
- *     M68KMAKE_OP(abcd, 8, rr, .)   abcd, size 8, register to register, default EA
- *     M68KMAKE_OP(abcd, 8, mm, ax7) abcd, size 8, memory to memory, register X is A7
+ *     M68KMAKE_OP(abcd, 8, rr, .)   abcd, size 8, to register, default EA
+ *     M68KMAKE_OP(abcd, 8, mm, ax7) abcd, size 8, memory to memory, X is A7
  *     M68KMAKE_OP(tst, 16, ., pcix) tst, size 16, PCIX addressing
  *
  * All opcode handler primitives end with a closing curly brace "}" at column 1
@@ -297,16 +297,16 @@ size:        Operation size
 spec proc:   Special processing mode:
                  .:    normal
                  s:    static operand
-                 r:    register operand
-                 rr:   register to register
+                 r:    operand
+                 rr:   to register
                  mm:   memory to memory
                  er:   effective address to register
-                 re:   register to effective address
-                 dd:   data register to data register
-                 da:   data register to address register
-                 aa:   address register to address register
-                 cr:   control register to register
-                 rc:   register to control register
+                 re:   to effective address
+                 dd:   data to data register
+                 da:   data to address register
+                 aa:   address to address register
+                 cr:   control to register
+                 rc:   to control register
                  toc:  to condition code register
                  tos:  to status register
                  tou:  to user stack pointer
@@ -321,26 +321,26 @@ spec ea:     Specific effective addressing mode:
                  i:    immediate
                  d:    data register
                  a:    address register
-                 ai:   address register indirect
-                 pi:   address register indirect with postincrement
-                 pd:   address register indirect with predecrement
-                 di:   address register indirect with displacement
-                 ix:   address register indirect with index
+                 ai:   address indirect
+                 pi:   address indirect with postincrement
+                 pd:   address indirect with predecrement
+                 di:   address indirect with displacement
+                 ix:   address indirect with index
                  aw:   absolute word address
                  al:   absolute long address
                  pcdi: program counter relative with displacement
                  pcix: program counter relative with index
-                 a7:   register specified in instruction is A7
-                 ax7:  register field X of instruction is A7
-                 ay7:  register field Y of instruction is A7
-                 axy7: register fields X and Y of instruction are A7
+                 a7:   specified in instruction is A7
+                 ax7:  field X of instruction is A7
+                 ay7:  field Y of instruction is A7
+                 axy7: fields X and Y of instruction are A7
 
 bit pattern: Pattern to recognize this opcode.  "." means don't care.
 
 allowed ea:  List of allowed addressing modes:
                  .: not present
-                 A: address register indirect
-                 +: ARI (address register indirect) with postincrement
+                 A: address indirect
+                 +: ARI (address indirect) with postincrement
                  -: ARI with predecrement
                  D: ARI with displacement
                  X: ARI with index
@@ -7157,14 +7157,14 @@ M68KMAKE_OP(moves, 8, ., .)
 				m68ki_write_8_fc(ea, REG_DFC, MASK_OUT_ABOVE_8(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_8(m68ki_read_8_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_8(REG_D[(word2 >> 12) & 7]) | m68ki_read_8_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -7192,14 +7192,14 @@ M68KMAKE_OP(moves, 16, ., .)
 				m68ki_write_16_fc(ea, REG_DFC, MASK_OUT_ABOVE_16(REG_DA[(word2 >> 12) & 15]));
 				return;
 			}
-			if(BIT_F(word2))		   /* Memory to address register */
+			if(BIT_F(word2))		   /* Memory to address */
 			{
 				REG_A[(word2 >> 12) & 7] = MAKE_INT_16(m68ki_read_16_fc(ea, REG_SFC));
 				if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to data register */
+			/* Memory to data */
 			REG_D[(word2 >> 12) & 7] = MASK_OUT_BELOW_16(REG_D[(word2 >> 12) & 7]) | m68ki_read_16_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);
@@ -7229,7 +7229,7 @@ M68KMAKE_OP(moves, 32, ., .)
 					USE_CYCLES(2);
 				return;
 			}
-			/* Memory to register */
+			/* Memory to */
 			REG_DA[(word2 >> 12) & 15] = m68ki_read_32_fc(ea, REG_SFC);
 			if(CPU_TYPE_IS_020_VARIANT(CPU_TYPE))
 				USE_CYCLES(2);

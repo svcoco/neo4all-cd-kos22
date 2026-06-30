@@ -590,7 +590,7 @@ unsigned int m68k_read_memory_8(unsigned int offset) {
 #ifdef SINGLE_MEMORY
     neo4all_prof_start(NEO4ALL_PROFILER_MEM);
 #endif
-    register unsigned char ret=0;
+    unsigned char ret=0;
     offset&=0xffffff;
     if(offset<0x200000)
         ret=*((Uint8*)&neogeo_prg_memory[offset^1]);
@@ -650,7 +650,7 @@ unsigned int  m68k_read_memory_16(unsigned int offset) {
 #ifdef SINGLE_MEMORY
     neo4all_prof_start(NEO4ALL_PROFILER_MEM);
 #endif
-    register unsigned short ret=0;
+    unsigned short ret=0;
     offset&=0xffffff;
     if(offset<0x200000)
         ret=*((Uint16*)&neogeo_prg_memory[offset]);
@@ -854,8 +854,8 @@ if (trazando) printf("write_16_400000(0x%X)=0x%X\n",offset,data&0xFFFF);
 }
 
 void cpu_pal_write_8(unsigned int offset, unsigned int data) {
-	register unsigned addr=offset&0x1FFE;
-	register unsigned short a = video_paletteram_ng[addr];
+	unsigned addr=offset&0x1FFE;
+	unsigned short a = video_paletteram_ng[addr];
 	if (offset & 0x1)
 		a = data | (a & 0xff00);
 	else
@@ -944,7 +944,7 @@ static int    cpu_vidreg_read_16(int offset)
 #ifndef SINGLE_MEMORY
     neo4all_prof_start(NEO4ALL_PROFILER_MEM);
 #endif
-    register int ret=0;
+    int ret=0;
     switch(offset)
     {
         case    0x3c0000:
@@ -1171,7 +1171,7 @@ static void cpu_bk_write(unsigned int address, unsigned int _data)
 //printf("cpu_bk_write(0x%X,0x%X)\n",address,_data);
 	if (aes4all_memory_cpu_size <= 0x100000)
 		return;
-	register unsigned char data=_data;
+	unsigned char data=_data;
 /*
 	if (address == aes4all_bksw_handler) {
 		data = 
@@ -1278,11 +1278,11 @@ static int cpu_coin_read(int addr)
 #ifndef SINGLE_MEMORY
     neo4all_prof_start(NEO4ALL_PROFILER_MEM);
 #endif
-    register int res=0;
+    int res=0;
     addr &= 0xFFFF;
     if (addr == 0x1) {
-        register int coinflip = pd4990a_testbit_r();
-        register int databit = pd4990a_databit_r();
+        int coinflip = pd4990a_testbit_r();
+        int databit = pd4990a_databit_r();
         res=neo4all_intern_coin ^ (coinflip << 6) ^ (databit << 7);
     }
     else
@@ -1315,7 +1315,7 @@ static void cpu_watchdog_reset (void)
 // NEOGEO CD
 
 static int cpu_upload_read(int offset) {
-    register int ret=-1;
+    int ret=-1;
 #if 0
 #ifndef SINGLE_MEMORY
     neo4all_prof_start(NEO4ALL_PROFILER_MEM);
@@ -1373,19 +1373,19 @@ static void cpu_upload_write_16(int offset, int data) {
 #ifndef SINGLE_MEMORY
     neo4all_prof_start(NEO4ALL_PROFILER_MEM);
 #endif
-    register int bank = m68k_read_memory_8(0x10FEDB);
+    int bank = m68k_read_memory_8(0x10FEDB);
     data&=0xffff;
 
     switch (m68k_read_memory_8(0x10FEDA)) {
         case 0x12: /* SPR */
 	    {
-            	register int offset2=(offset & ~0x02)+(bank<<20);
+            	int offset2=(offset & ~0x02)+(bank<<20);
             	if((offset2&0x7f)<64)
                		offset2=(offset2&0xfff80)+((offset2&0x7f)<<1)+4;
            	 else
                		offset2=(offset2&0xfff80)+((offset2&0x7f)<<1)-128;
 
-           	register char* dest=&neogeo_spr_memory[offset2];
+           	char* dest=&neogeo_spr_memory[offset2];
 
             	if (offset & 0x02) {
                		/* second word */
@@ -1428,7 +1428,7 @@ static void cpu_upload_write_32(int offset, int data) {
             else
                offset=(offset&0xfff80)+((offset&0x7f)<<1)-128;
 	    {
-            	register char *dest=&neogeo_spr_memory[offset];
+            	char *dest=&neogeo_spr_memory[offset];
             	swab((char*)&data, _sprbuffer, sizeof(_sprbuffer));
             	extract8(_sprbuffer, dest);
 	    }
@@ -1457,12 +1457,12 @@ static void cpu_memcard_write(int offset, int data) {
 
 static void cpu_pd4990_write_8(unsigned int address, unsigned int value)
 {
-	register unsigned char data=value;
+	unsigned char data=value;
 	pd4990a_control_w(address,value);
 }
 
 static void cpu_pd4990_write_16(unsigned int address, unsigned int value)
 {
-	register unsigned short data=value;
+	unsigned short data=value;
 	pd4990a_control_w(address,value);
 }

@@ -38,9 +38,9 @@ Uint32 z80_cycles;
 #if !defined(USE_RAZE) || defined(RAZE_NO_MAPPING)
 static void _fast_memcpy(void *OUT, const void *IN, size_t N)
 {
-	register unsigned *d=(unsigned *)OUT;
-	register unsigned *s=(unsigned *)IN;
-	register unsigned n=N;
+	unsigned *d=(unsigned *)OUT;
+	unsigned *s=(unsigned *)IN;
+	unsigned n=N;
 	while(n--){
 #ifdef DREAMCAST
 		asm("pref @%0" : : "r" (s + 8));

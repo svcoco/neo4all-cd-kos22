@@ -35,7 +35,7 @@
 
 	no support:
 		status BUSY flag (everytime not busy)
-		YM2608 status mask (register :0x110)
+		YM2608 status mask (:0x110)
 		YM2608 RYTHM sound
 		YM2608 PCM memory data access , DELTA-T-ADPCM with PCM port
 		YM2151 CSM speech mode with internal timer
@@ -155,7 +155,7 @@
 #define EG_UED   ((3*EG_ENT)<<ENV_BITS)	/* end of SEG UPSISE */
 #endif
 
-/* register number to channel number , slot offset */
+/* number to channel number , slot offset */
 #define OPN_CHAN(N) (N&3)
 #define OPN_SLOT(N) ((N>>2)&3)
 #define OPM_CHAN(N) (N&7)
@@ -1383,7 +1383,7 @@ FM_LF(6.88), FM_LF(9.63), FM_LF(48.1), FM_LF(72.2) };
 /*	LOG(LOG_INF,("OPN %d set priscaler %d\n",OPN->ST.index,pris));*/
 }
 
-/* ---------- write a OPN mode register 0x20-0x2f ---------- */
+/* ---------- write a OPN mode 0x20-0x2f ---------- */
 static void OPNWriteMode(FM_OPN * OPN, int r, int v)
 {
     Uint8 c;
@@ -1443,7 +1443,7 @@ static void OPNWriteMode(FM_OPN * OPN, int r, int v)
     }
 }
 
-/* ---------- write a OPN register (0x30-0xff) ---------- */
+/* ---------- write a OPN (0x30-0xff) ---------- */
 static void OPNWriteReg(FM_OPN * OPN, int r, int v)
 {
     Uint8 c;
@@ -2127,7 +2127,7 @@ int YM2610Write(int a, Uint8 v)
     switch (a & 3) {
     case 0:			/* address port 0 */
 	OPN->ST.address = v & 0xff;
-	/* Write register to SSG emurator */
+	/* Write to SSG emurator */
 	if (v < 16)
 	    SSGWrite(0, v);
 	break;
@@ -2165,7 +2165,7 @@ int YM2610Write(int a, Uint8 v)
 	    break;
 	default:		/* OPN section */
 	    YM2610UpdateReq( /*n */ );
-	    /* write register */
+	    /* write */
 	    OPNWriteReg(OPN, addr, v);
 	}
 	break;

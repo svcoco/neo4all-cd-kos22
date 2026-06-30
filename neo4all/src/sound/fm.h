@@ -158,7 +158,7 @@ typedef struct fm_state {
     int rate;			/* sampling rate (Hz)  */
     double freqbase;		/* frequency base      */
     double TimerBase;		/* Timer base time     */
-    Uint8 address;		/* address register    */
+    Uint8 address;		/* address    */
     Uint8 irq;			/* interrupt level     */
     Uint8 irqmask;		/* irq mask            */
     Uint8 status;		/* status flag         */

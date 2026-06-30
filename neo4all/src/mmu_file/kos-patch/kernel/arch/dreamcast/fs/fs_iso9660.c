@@ -911,7 +911,7 @@ int fs_iso9660_init() {
 int fs_iso9660_shutdown() {
 	int i;
 
-	/* De-register with vblank */
+	/* De-with vblank */
 	vblank_handler_remove(iso_vblank_hnd);
 	
 	/* Dealloc cache block space */

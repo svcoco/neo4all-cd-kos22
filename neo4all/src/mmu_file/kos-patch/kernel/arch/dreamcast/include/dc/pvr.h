@@ -518,7 +518,7 @@ static inline uint32 PVR_PACK_16BIT_UV(float u, float v) {
 
 /**** Register macros ***************************************************/
 
-/* We use these macros to do all PVR register access, so that it's
+/* We use these macros to do all PVR access, so that it's
    simple later on to hook them for debugging or whatnot. */
 
 #define PVR_GET(REG) (* ( (uint32*)( 0xa05f8000 + (REG) ) ) )

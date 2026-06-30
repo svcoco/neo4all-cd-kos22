@@ -15,9 +15,9 @@ void fade16(SDL_Surface *screen, unsigned short n)
 	unsigned short * buff=(unsigned short*)screen->pixels;
 	for(i=0;i<total;i++)
 	{
-		register unsigned short r=(buff[i]&rm)>>rs;
-		register unsigned short g=(buff[i]&gm)>>gs;
-		register unsigned short b=(buff[i]&bm)>>bs;
+		unsigned short r=(buff[i]&rm)>>rs;
+		unsigned short g=(buff[i]&gm)>>gs;
+		unsigned short b=(buff[i]&bm)>>bs;
 		if (r>n)
 			r-=n;
 		else
@@ -58,9 +58,9 @@ void fade16(SDL_Surface *screen, unsigned short n)
 	unsigned short *buff=(unsigned short*)(((unsigned)screen->pixels)+(screen->pitch*j));
 	for(i=0;i<total_x;i++)
 	{
-		register unsigned short r=(buff[i]&rm)>>rs;
-		register unsigned short g=(buff[i]&gm)>>gs;
-		register unsigned short b=(buff[i]&bm)>>bs;
+		unsigned short r=(buff[i]&rm)>>rs;
+		unsigned short g=(buff[i]&gm)>>gs;
+		unsigned short b=(buff[i]&bm)>>bs;
 		if (r>n)
 			r-=n;
 		else

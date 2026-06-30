@@ -97,8 +97,8 @@ static void *mmu_file_memprefetch=NULL;
 
 static void mmu_file_sound_silence(void)
 {
-	register uint32 *dat  =  (uint32*)SDL_DC_SPU_RAM_BASE;
-	register unsigned size = MMU_FILE_SOUND_PATCH >> 5;
+	uint32 *dat  =  (uint32*)SDL_DC_SPU_RAM_BASE;
+	unsigned size = MMU_FILE_SOUND_PATCH >> 5;
 	while(size--)
 	{
 		*((vuint32*)dat++) = 0;
@@ -196,9 +196,9 @@ static void mmu_file_real_handler(unsigned n, void *mem, unsigned start, unsigne
 	memcpy(mem,ret,size);
 #else
 	{
-		register unsigned *d=(unsigned *)mem;
-		register unsigned *s=(unsigned *)ret;
-		register unsigned n=size>>5;
+		unsigned *d=(unsigned *)mem;
+		unsigned *s=(unsigned *)ret;
+		unsigned n=size>>5;
 		while(n--){
 			asm("pref @%0" : : "r" (s + 8));
 			*d++=*s++;
@@ -217,9 +217,9 @@ static void mmu_file_real_handler(unsigned n, void *mem, unsigned start, unsigne
 static void mmu_file_prefetch_handler(void *mem, unsigned start, unsigned size)
 {
 #ifdef DREAMCAST
-	register unsigned *d=(unsigned *)mem;
-	register unsigned *s=(unsigned *)mmu_file_memprefetch;
-	register unsigned n=size>>5;
+	unsigned *d=(unsigned *)mem;
+	unsigned *s=(unsigned *)mmu_file_memprefetch;
+	unsigned n=size>>5;
 	while(n--){
 		asm("pref @%0" : : "r" (s + 8));
 		*d++=*s++;

@@ -59,15 +59,15 @@ CACHE_STATIC_INLINE void tcache_hash_old_cleaner(int n_frame)
 #ifdef DEBUG_GL
     	puts("TILE cache Cleaner");
 #endif
-	register unsigned breaktime=neo4all_glframes-n_frame;
-	register unsigned i;
+	unsigned breaktime=neo4all_glframes-n_frame;
+	unsigned i;
 	for(i=0;i<TCACHE_HASH_SIZE;i++)
 	{
-		register tcache_node_t *p=tcache_hash_table[i];
-		register tcache_node_t *p0=p;
+		tcache_node_t *p=tcache_hash_table[i];
+		tcache_node_t *p0=p;
 		while(p)
 		{
-			register tcache_node_t *next=p->next;
+			tcache_node_t *next=p->next;
 			if (p->used < breaktime)
 			{
 				p->next=NULL;
@@ -99,14 +99,14 @@ void tcache_hash_pal_cleaner(void);
 #else
 CACHE_STATIC_INLINE void tcache_hash_pal_cleaner(void)
 {
-	register unsigned i;
+	unsigned i;
 	for(i=0;i<TCACHE_HASH_SIZE;i++)
 	{
-		register tcache_node_t *p=tcache_hash_table[i];
-		register tcache_node_t *p0=p;
+		tcache_node_t *p=tcache_hash_table[i];
+		tcache_node_t *p0=p;
 		while(p)
 		{
-			register tcache_node_t *next=p->next;
+			tcache_node_t *next=p->next;
 			if (video_palette_use[p->col])
 			{
 				p->next=NULL;
@@ -139,7 +139,7 @@ tcache_rec_t tcache_hash_insert(unsigned key);
 #else
 CACHE_STATIC_INLINE tcache_rec_t tcache_hash_insert(unsigned key)
 {
-	register unsigned bucket=tcache_hash(key);
+	unsigned bucket=tcache_hash(key);
 	
 	if (!first_tile)
 	{
@@ -155,7 +155,7 @@ CACHE_STATIC_INLINE tcache_rec_t tcache_hash_insert(unsigned key)
 		}
 	}
 	{
-	register tcache_node_t *p, *p0;
+	tcache_node_t *p, *p0;
 	p=first_tile;
 	first_tile=p->next;
 	p0=tcache_hash_table[bucket];
@@ -177,8 +177,8 @@ int tcache_hash_delete(unsigned key);
 #else
 CACHE_STATIC_INLINE int tcache_hash_delete(unsigned key)
 {
-	register tcache_node_t *p0=NULL, *p;
-	register unsigned bucket=tcache_hash(key);
+	tcache_node_t *p0=NULL, *p;
+	unsigned bucket=tcache_hash(key);
 	p=tcache_hash_table[bucket];
 	while (p && !tcache_compEq(p->key,key))
 	{
@@ -211,7 +211,7 @@ tcache_rec_t tcache_hash_find(unsigned key);
 #else
 CACHE_STATIC_INLINE tcache_rec_t tcache_hash_find(unsigned key)
 {
-	register tcache_node_t *p;
+	tcache_node_t *p;
 
 	p = tcache_hash_table[tcache_hash(key)];
 	while (p && !tcache_compEq(p->key, key))
@@ -228,8 +228,8 @@ unsigned tcache_hash_unused(void);
 #else
 CACHE_STATIC_INLINE unsigned tcache_hash_unused(void)
 {
-	register unsigned ret=0;
-	register tcache_node_t *p=first_tile;
+	unsigned ret=0;
+	tcache_node_t *p=first_tile;
 	while(p)
 	{
 		ret++;

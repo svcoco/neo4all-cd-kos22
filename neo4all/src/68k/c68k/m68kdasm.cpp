@@ -191,7 +191,7 @@ static unsigned int g_address_mask = 0xffffffff;
 static char g_dasm_str[100]; /* string to hold disassembly */
 static char g_helper_str[100]; /* string to hold helpful info */
 static uint g_cpu_pc;        /* program counter */
-static uint g_cpu_ir;        /* instruction register */
+static uint g_cpu_ir;        /* instruction */
 static uint g_cpu_type;
 
 /* used by ops like asr, ror, addq, etc */
@@ -362,31 +362,31 @@ static char* get_ea_mode_str(uint instruction, uint size)
 	switch(instruction & 0x3f)
 	{
 		case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x05: case 0x06: case 0x07:
-		/* data register direct */
+		/* data direct */
 			sprintf(mode, "D%d", instruction&7);
 			break;
 		case 0x08: case 0x09: case 0x0a: case 0x0b: case 0x0c: case 0x0d: case 0x0e: case 0x0f:
-		/* address register direct */
+		/* address direct */
 			sprintf(mode, "A%d", instruction&7);
 			break;
 		case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
-		/* address register indirect */
+		/* address indirect */
 			sprintf(mode, "(A%d)", instruction&7);
 			break;
 		case 0x18: case 0x19: case 0x1a: case 0x1b: case 0x1c: case 0x1d: case 0x1e: case 0x1f:
-		/* address register indirect with postincrement */
+		/* address indirect with postincrement */
 			sprintf(mode, "(A%d)+", instruction&7);
 			break;
 		case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25: case 0x26: case 0x27:
-		/* address register indirect with predecrement */
+		/* address indirect with predecrement */
 			sprintf(mode, "-(A%d)", instruction&7);
 			break;
 		case 0x28: case 0x29: case 0x2a: case 0x2b: case 0x2c: case 0x2d: case 0x2e: case 0x2f:
-		/* address register indirect with displacement*/
+		/* address indirect with displacement*/
 			sprintf(mode, "(%s,A%d)", make_signed_hex_str_16(read_imm_16()), instruction&7);
 			break;
 		case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: case 0x35: case 0x36: case 0x37:
-		/* address register indirect with index */
+		/* address indirect with index */
 			extension = read_imm_16();
 
 			if((g_cpu_type & M68010_LESS) && EXT_INDEX_SCALE(extension))
@@ -616,20 +616,20 @@ static char* get_ea_mode_str(uint instruction, uint size)
  * 8   : size = byte
  * 16  : size = word
  * 32  : size = long
- * rr  : register to register
+ * rr  : to register
  * mm  : memory to memory
  * r   : register
  * s   : static
  * er  : effective address -> register
- * re  : register -> effective address
+ * re  : -> effective address
  * ea  : using effective address mode of operation
- * d   : data register direct
- * a   : address register direct
- * ai  : address register indirect
- * pi  : address register indirect with postincrement
- * pd  : address register indirect with predecrement
- * di  : address register indirect with displacement
- * ix  : address register indirect with index
+ * d   : data direct
+ * a   : address direct
+ * ai  : address indirect
+ * pi  : address indirect with postincrement
+ * pd  : address indirect with predecrement
+ * di  : address indirect with displacement
+ * ix  : address indirect with index
  * aw  : absolute word
  * al  : absolute long
  */
@@ -2835,9 +2835,9 @@ static void d68020_unpk_mm(void)
 /* ======================================================================== */
 
 /* EA Masks:
-800 = data register direct
-400 = address register direct
-200 = address register indirect
+800 = data direct
+400 = address direct
+200 = address indirect
 100 = ARI postincrement
  80 = ARI pre-decrement
  40 = ARI displacement
