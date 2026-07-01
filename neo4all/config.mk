@@ -2,7 +2,7 @@
 
 NAME = neo4all
 
-#AES=1
+# AES=1  -- Neo Geo AES (cartridge) mode; out of scope for this KOS 2.2.x port (Neo4ALL CD only)
 #MUSASHI_CORE=1
 FAME_CORE=1
 #FAME_C_CORE=1
