@@ -774,23 +774,25 @@ void video_flip(SDL_Surface *surface)
 
 #endif
 
-  double t_x1=0.0,t_y1=0.0,t_x2=512.0,t_y2=512.0;
+  /* Neo Geo image: 320×240 pixels in the top-left of a 512×512 texture.
+     u_right=320/512, v_bottom=240/512.  Explicit coords avoid relying on
+     GLdc vertex clipping to recover correct texcoords at the right/bottom
+     edges — GLdc does not guarantee interpolation past the viewport boundary.
+     DC: +4 logical-pixel y-offset shifts the image down for CRT overscan
+     (top 4 rows of screen empty; bottom 4 rows of Neo Geo image clipped
+     at glOrtho y=240 — intentional Chui behavior). */
+  double t_x1=0.0, t_x2=320.0;
+  double t_y1=0.0, t_y2=240.0;
 #ifdef DREAMCAST
   t_y1+=4.0; t_y2+=4.0;
 #endif
+  const double u_r=320.0/512.0, v_b=240.0/512.0;
 
   glBegin(GL_QUADS);
-  	glTexCoord2f(0.0,0.0);
-	glVertex3f(t_x1,t_y1,tile_z);
-	
-  	glTexCoord2f(1.0,0.0);
-	glVertex3f(t_x2,t_y1,tile_z);
-
-  	glTexCoord2f(1.0,1.0);
-	glVertex3f(t_x2,t_y2,tile_z);
-
-  	glTexCoord2f(0.0,1.0);
-	glVertex3f(t_x1,t_y2,tile_z);
+    glTexCoord2f(0.0, 0.0); glVertex3f(t_x1, t_y1, tile_z);
+    glTexCoord2f(u_r, 0.0); glVertex3f(t_x2, t_y1, tile_z);
+    glTexCoord2f(u_r, v_b); glVertex3f(t_x2, t_y2, tile_z);
+    glTexCoord2f(0.0, v_b); glVertex3f(t_x1, t_y2, tile_z);
   glEnd();
 
 #ifndef DREAMCAST
