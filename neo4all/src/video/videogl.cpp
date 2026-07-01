@@ -53,127 +53,103 @@ float tile_z=TILE_Z_INIT;
 unsigned neo4all_glframes=8;
 
 static void init_cache(void) {
-#ifndef DREAMCAST
-    int i;
-    GLuint texture;
-#endif
-
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
 
-
     if (neo4all_texture_buffer==NULL)
     {
-	neo4all_texture_buffer_free=calloc(64+(16*16*2),1);
-	neo4all_texture_buffer=(void *)(((((unsigned)neo4all_texture_buffer_free)+32)/32)*32);
-#ifdef DREAMCAST
-	{
-		unsigned needed = (16*16*2*(TCACHE_SIZE))+(8*8*2*(FCACHE_SIZE))+(512*512*2);
-		void *raw;
-		printf("DIAG: about to pvr_mem_malloc(%u bytes)\n", needed);
-		raw = pvr_mem_malloc(needed);
-		printf("DIAG: pvr_mem_malloc returned %p\n", raw);
-		unsigned dcpvrmem=(unsigned)raw;
-		neo4all_texture_real_buffer=(void *)dcpvrmem;
-		dcpvrmem+=(16*16*2*TCACHE_SIZE);
-		neo4all_font_real_buffer=(void *)dcpvrmem;
-		dcpvrmem+=(8*8*2*(FCACHE_SIZE));
-		neo4all_texture_surface=(void *)dcpvrmem;
-        	neo4all_black_texture_buffer=(void *)dcpvrmem;
-	}
-#else
-	neo4all_texture_real_buffer=calloc(16*16*2,TCACHE_SIZE);
-	neo4all_font_real_buffer=calloc(8*8*2,FCACHE_SIZE);
-	neo4all_texture_surface=calloc(512*512,2);
-        neo4all_black_texture_buffer=(void *)calloc(16*16,2);
+        /* On DC, pvr_prealloc_neo4all_textures() already populated all
+           neo4all_texture_* pointers before init_cache() is reached.
+           This branch is only taken on non-DC builds. */
+        neo4all_texture_buffer_free=calloc(64+(16*16*2),1);
+        neo4all_texture_buffer=(void *)(((((unsigned)neo4all_texture_buffer_free)+32)/32)*32);
+#ifndef DREAMCAST
+        neo4all_texture_real_buffer=calloc(16*16*2,TCACHE_SIZE);
+        neo4all_font_real_buffer=calloc(8*8*2,FCACHE_SIZE);
+        neo4all_texture_surface=calloc(512*512,2);
+        neo4all_black_texture_buffer=calloc(16*16,2);
 #endif
-
     }
 
 #ifndef DREAMCAST
-    for(i=0;i<TCACHE_SIZE+FCACHE_SIZE;i++)
-	glGenTextures(1,(GLuint *)&tile_opengl_tex[i]);
-    glGenTextures(1,(GLuint *)&black_opengl_tex);
+    {
+        int i;
+        for(i=0;i<TCACHE_SIZE+FCACHE_SIZE;i++)
+            glGenTextures(1,(GLuint *)&tile_opengl_tex[i]);
+        glGenTextures(1,(GLuint *)&black_opengl_tex);
+    }
 #endif
     video_reset_gl();
 }
 
 static void free_cache(void) {
-#ifndef DREAMCAST
+#ifdef DREAMCAST
+    /* tile+font: single pvr_mem block, font_real_buffer points inside it */
+    pvr_mem_free(neo4all_texture_real_buffer);
+    /* sysRAM allocations from pvr_prealloc_neo4all_textures() */
+    free(neo4all_texture_surface);
+    free(neo4all_black_texture_buffer);
+#else
     free(neo4all_texture_real_buffer);
     free(neo4all_font_real_buffer);
     free(neo4all_texture_surface);
     free(neo4all_black_texture_buffer);
-#else
-    pvr_mem_free(neo4all_texture_real_buffer);
 #endif
     free(neo4all_texture_buffer_free);
     neo4all_texture_buffer=NULL;
 }
 
+#ifdef DREAMCAST
+static void pvr_prealloc_neo4all_textures(void) {
+    /* GLdc's _glInitTextures() (texture.c:601) calls
+         pvr_mem_malloc(pvr_mem_available() - 64 KB)
+       consuming the entire texture heap on glKosInitEx. Pre-allocating
+       Neo4ALL's tile/font buffers first leaves GLdc with only the remainder
+       (~880 KB), enough for screen_texture (512x512x2 = 512 KB).
+       GLdc's InitGPU() calls pvr_init() a second time; KOS detects this,
+       emits a warning, and skips the second init — benign, architecturally
+       unavoidable with GLdc 1.1's API. */
+    pvr_init_params_t params = {
+        { PVR_BINSIZE_32, PVR_BINSIZE_0, PVR_BINSIZE_32, PVR_BINSIZE_0, PVR_BINSIZE_32 },
+        2560 * 256, /* matches GLdc default: sh4.c PVR_VERTEX_BUF_SIZE */
+        0,          /* no DMA */
+        GL_FALSE,   /* no FSAA */
+        1,          /* autosort disabled */
+        2           /* opb overflow count */
+    };
+    pvr_init(&params);
+
+    void *raw = pvr_mem_malloc((16*16*2 * TCACHE_SIZE) + (8*8*2 * FCACHE_SIZE));
+    if (raw) {
+        neo4all_texture_real_buffer = raw;
+        neo4all_font_real_buffer    = (void *)((unsigned)raw + 16*16*2 * TCACHE_SIZE);
+    }
+    /* Framebuffer and scratch surfaces in sysRAM: CPU-written, uploaded to
+       GLdc's VRAM pool via glTexImage2D each frame. */
+    neo4all_texture_surface      = calloc(512 * 512, 2);
+    neo4all_black_texture_buffer = calloc(16 * 16,   2);
+    neo4all_texture_buffer_free  = calloc(64 + (16*16*2), 1);
+    neo4all_texture_buffer = (void *)(((((unsigned)neo4all_texture_buffer_free)+32)/32)*32);
+}
+
+static void gldc_init(void) {
+    GLdcConfig config;
+    glKosInitConfig(&config);
+    config.autosort_enabled           = GL_FALSE;
+    config.initial_op_capacity        = 512;
+    config.initial_tr_capacity        = 512;
+    config.initial_pt_capacity        = 64;
+    config.initial_immediate_capacity = 0;
+    glKosInitEx(&config);
+}
+#endif
+
 SDL_bool init_video_gl(void) {
 #ifdef DREAMCAST
-    {
-        /* glKosInitEx llama pvr_init internamente y luego su _glInitTextures()
-           se apropia de TODA la pvr_mem disponible (pvr_mem_available - 64 KB).
-           Si dejamos que GLdc inicialice primero, no queda heap para Neo4ALL.
-           Solución: inicializar PVR directamente primero, pre-alojar el bloque
-           de texturas de Neo4ALL, y LUEGO llamar glKosInitEx — que detectará
-           el PVR ya activo, saltará pvr_init, y tomará solo lo que reste.
-           init_cache() tiene el guard (neo4all_texture_buffer==NULL) que evita
-           la re-alocación. */
-
-        /* Paso 1: inicializar PVR con los mismos params que usaría GLdc */
-        pvr_init_params_t pvr_params = {
-            {PVR_BINSIZE_32, PVR_BINSIZE_0, PVR_BINSIZE_32, PVR_BINSIZE_0, PVR_BINSIZE_32},
-            2560 * 256, /* vertex buffer: igual al default de GLdc (sh4.c) */
-            0,          /* no DMA */
-            GL_FALSE,   /* no FSAA */
-            1,          /* autosort desactivado (igual que config.autosort_enabled=GL_FALSE) */
-            2           /* opb overflow count */
-        };
-        pvr_init(&pvr_params);
-
-        /* Paso 2: pre-alojar tiles y fonts de Neo4ALL en pvr_mem ANTES de que
-           GLdc reclame el resto del heap.
-           neo4all_texture_surface (512x512x2 = 512 KB) NO va en pvr_mem: es un
-           buffer de escritura de la CPU que glTexImage2D sube a GLdc cada frame.
-           Dejarlo en sysRAM (calloc) libera ~512 KB de pvr_mem para el pool de
-           texturas de GLdc, que necesita al menos 512 KB para screen_texture. */
-        {
-            unsigned needed = (16*16*2*(TCACHE_SIZE)) + (8*8*2*(FCACHE_SIZE));
-            printf("DIAG: pvr_mem_available = %u bytes, neo4all pvr needs %u bytes\n",
-                   (unsigned)pvr_mem_available(), needed);
-            void *raw = pvr_mem_malloc(needed);
-            printf("DIAG: pvr_mem_malloc returned %p\n", raw);
-            if (raw) {
-                unsigned dcpvrmem = (unsigned)raw;
-                neo4all_texture_real_buffer = (void *)dcpvrmem;
-                dcpvrmem += (16*16*2*TCACHE_SIZE);
-                neo4all_font_real_buffer = (void *)dcpvrmem;
-            }
-            /* Superficies en sysRAM — copiadas a VRAM por glTexImage2D cada frame */
-            neo4all_texture_surface      = calloc(512*512, 2);
-            neo4all_black_texture_buffer = calloc(16*16,  2);
-            neo4all_texture_buffer_free  = calloc(64+(16*16*2), 1);
-            neo4all_texture_buffer = (void *)(((((unsigned)neo4all_texture_buffer_free)+32)/32)*32);
-        }
-
-        /* Paso 3: inicializar GLdc — pvr_init ya fue llamado, lo saltará;
-           _glInitTextures() tomará solo la pvr_mem restante */
-        GLdcConfig config;
-        glKosInitConfig(&config);
-        config.autosort_enabled = GL_FALSE;
-        config.initial_op_capacity = 512;
-        config.initial_tr_capacity = 512;
-        config.initial_pt_capacity = 64;
-        config.initial_immediate_capacity = 0;
-        glKosInitEx(&config);
-        printf("DIAG: pvr_mem_available after glKosInitEx = %u bytes\n",
-               (unsigned)pvr_mem_available());
-    }
+    pvr_prealloc_neo4all_textures();
+    gldc_init();
 #endif
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 1);
