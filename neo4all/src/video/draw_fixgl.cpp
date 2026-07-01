@@ -238,7 +238,14 @@ void video_draw_font_textures_gl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, 8, 8, 0, 
 		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, font_buffer);
 #else
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
+	/* BUGFIX (no presente en Gate 1A original de Chui, pero corrompia memoria):
+	   font_buffer es un glifo de 8x8 reales (tile_list[i].buffer), no 512x512.
+	   Pedirle a glTexImage2D que lea 512x512 desde un buffer de 8x8 lee memoria
+	   fuera de limites del buffer real, agotando la VRAM del PVR en pocas
+	   iteraciones del loop (out of PVR memory) y corrompiendo memoria adyacente.
+	   Se alinea con la rama #ifndef DREAMCAST, que ya usaba las dimensiones
+	   correctas. */
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, 8, 8, 0, 
 		GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, font_buffer);
 #endif
 	glBegin(GL_QUADS);

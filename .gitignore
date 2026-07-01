@@ -14,3 +14,7 @@ neo4all_modified.tar
 
 # Imagen de disco generada para pruebas en Flycast
 /disc/
+
+# Directorios de contexto y salidas externas al build
+/context/
+/output/
