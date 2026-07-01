@@ -52,6 +52,13 @@ void *neo4all_black_texture_buffer=NULL;
 float tile_z=TILE_Z_INIT;
 unsigned neo4all_glframes=8;
 
+#ifdef DREAMCAST
+int   neo4all_hw_width  = 640;
+int   neo4all_hw_height = 480;
+float neo4all_scale_x   = 2.0f;
+float neo4all_move_x    = 16.0f;
+#endif
+
 static void init_cache(void) {
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -150,12 +157,31 @@ SDL_bool init_video_gl(void) {
 #ifdef DREAMCAST
     pvr_prealloc_neo4all_textures();
     gldc_init();
+    {
+        int cable = vid_check_cable();
+        if (cable == CT_VGA) {
+            neo4all_hw_width  = 640;
+            neo4all_hw_height = 480;
+            neo4all_scale_x   = 2.0f;
+            neo4all_move_x    = 16.0f;
+        } else {
+            /* CT_RGB / CT_COMPOSITE / CT_NONE → 15 KHz cable: native 240p */
+            neo4all_hw_width  = 320;
+            neo4all_hw_height = 240;
+            neo4all_scale_x   = 1.0f;
+            neo4all_move_x    = 8.0f;
+        }
+    }
 #endif
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 1);
+#ifdef DREAMCAST
+    gl_screen = SDL_SetVideoMode(neo4all_hw_width, neo4all_hw_height, 16,
+                SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | SDL_OPENGL);
+#else
     gl_screen = SDL_SetVideoMode(VIDEO_GL_WIDTH, VIDEO_GL_HEIGHT, 16,
-		    SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | SDL_OPENGL);
-	
+                SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWPALETTE | SDL_OPENGL);
+#endif
     if ( gl_screen == NULL)
 	return SDL_FALSE;
 
@@ -166,7 +192,11 @@ SDL_bool init_video_gl(void) {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#ifdef DREAMCAST
+    glViewport(0, 0, neo4all_hw_width, neo4all_hw_height);
+#else
     glViewport(0, 0, VIDEO_GL_WIDTH, VIDEO_GL_HEIGHT);
+#endif
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     glOrtho(0.0, 320.0, 240.0, 0.0, -50.0, 50.0 );

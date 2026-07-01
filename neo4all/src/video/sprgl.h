@@ -16,8 +16,8 @@
 #define SCALE_X (1.0f/(640.0f/VIDEO_GL_WIDTH))
 #define MOVE_X (8.0f/(640.0f/VIDEO_GL_WIDTH))
 #else
-#define SCALE_X (2.0f/(640.0f/VIDEO_GL_WIDTH))
-#define MOVE_X (16.0f/(640.0f/VIDEO_GL_WIDTH))
+#define SCALE_X neo4all_scale_x
+#define MOVE_X  neo4all_move_x
 #endif
 #define SCALE_Y SCALE_X
 #define MOVE_Y MOVE_X

@@ -17,13 +17,14 @@
 
 #ifdef DREAMCAST
 
-/*
-#define VIDEO_GL_WIDTH 320
-#define VIDEO_GL_HEIGHT 240
-*/
-#define VIDEO_GL_WIDTH 640
-#define VIDEO_GL_HEIGHT 480
-
+/* Display resolution — set at runtime in init_video_gl() via vid_check_cable():
+     CT_VGA  (0) → 640×480, 2× integer scale of Neo Geo 320×240
+     15 KHz  (1-3) → 320×240, native 240p, 1:1 pixel mapping        */
+extern int   neo4all_hw_width;
+extern int   neo4all_hw_height;
+/* PVR screen-space scale: 2.0/16.0 for VGA, 1.0/8.0 for 240p */
+extern float neo4all_scale_x;
+extern float neo4all_move_x;
 
 #define TILE_Z_INIT 1.0
 #define TILE_Z_INC 0.69
