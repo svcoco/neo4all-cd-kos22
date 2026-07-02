@@ -25,6 +25,9 @@ extern int   neo4all_hw_height;
 /* PVR screen-space scale: 2.0/16.0 for VGA, 1.0/8.0 for 240p */
 extern float neo4all_scale_x;
 extern float neo4all_move_x;
+/* VRAM buffer for menu screen texture (512×512 ARGB1555).
+   Filled each frame by pvr_txr_load() in video_flip(). */
+extern void *neo4all_screen_pvr_buffer;
 
 #define TILE_Z_INIT 1.0
 #define TILE_Z_INC 0.69
