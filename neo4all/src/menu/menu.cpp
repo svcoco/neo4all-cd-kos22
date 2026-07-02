@@ -189,23 +189,7 @@ static void update_window_color(void)
 
 void text_draw_background()
 {
-#if !defined(SHOW_CONSOLE) && defined(MENU_ALPHA)
-	if (!used_blitter)
-	{
-#endif
-		draw_background(text_screen);
-#if !defined(SHOW_CONSOLE) && defined(MENU_ALPHA)
-	}
-	else
-	{
-#ifdef USE_VIDEO_GL
-		bzero(text_screen->pixels,text_screen->h*text_screen->pitch);
-#else
-		SDL_FillRect(text_screen,NULL,0);
-#endif
-	}
-#endif
-
+	SDL_FillRect(text_screen, NULL, 0);
 }
 
 void text_flip(void)
@@ -341,7 +325,8 @@ void init_text(int splash)
 	text_win_bottom=load_img_255(MENU_FILE_WIN_BOTTOM);
 	text_cdrom=menu_IMG_Load(MENU_FILE_LOADING);
 
-	init_background();
+	/* init_background() loaded cd_bg*.png for the animated background.
+	   Background is now a solid black fill — PNGs not needed. */
 
 	obten_colores();
 	sound_play_menu_music();

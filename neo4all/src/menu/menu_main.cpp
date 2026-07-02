@@ -108,6 +108,9 @@ static int try_to_list_files(void)
 }
 #endif
 
+/* Draw selection cursor at column 5 (pixel x=40), one column left of items. */
+static inline void write_cursor(int row) { write_text(5, row, ">"); }
+
 static inline void draw_mainMenu(int c)
 {
 //	static int b=0;
@@ -119,6 +122,7 @@ static inline void draw_mainMenu(int c)
 
 	if (c==0)
 	{
+		write_cursor(4);
 		write_text_sel(6,4,252,text_str_region);
 		switch(neogeo_region)
 		{
@@ -148,6 +152,7 @@ static inline void draw_mainMenu(int c)
 
 	if (c==1)
 	{
+		write_cursor(6);
 		write_text_sel(6,6,252,text_str_frameskip);
 		switch(neogeo_frameskip)
 		{
@@ -194,6 +199,7 @@ static inline void draw_mainMenu(int c)
 
 	if (c==2)
 	{
+		write_cursor(8);
 		write_text_sel(6,8,252,text_str_sound);
 		if (neogeo_sound_enable)
 			write_text_inv(25,8,"||||");
@@ -215,6 +221,7 @@ static inline void draw_mainMenu(int c)
 
 	if (c==3)
 	{
+		write_cursor(10);
 		write_text_sel(6,10,252,text_str_cdaudio);
 		if (!cdda_disabled)
 			write_text_inv(25,10,"||||");
@@ -236,6 +243,7 @@ static inline void draw_mainMenu(int c)
 
 	if (c==4)
 	{
+		write_cursor(12);
 		write_text_sel(6,12,252,text_str_filter);
 		if (mainMenu_filter)
 			write_text_inv(25,12,"||||||||||||||||");
@@ -259,31 +267,46 @@ static inline void draw_mainMenu(int c)
 
 	write_text(6,14,text_str_separator);
 	if ((c==5)) //&&(bb))
+	{
+		write_cursor(15);
 		write_text_sel(6,15,252,text_str_cpu);
+	}
 	else
 		write_text(6,15,text_str_cpu);
 
 	if ((c==6)) //&&(bb))
+	{
+		write_cursor(17);
 		write_text_sel(6,17,252,text_str_control);
+	}
 	else
 		write_text(6,17,text_str_control);
 	write_text(6,18,text_str_separator);
 
 	write_text(6,19,text_str_separator);
 	if ((c==7)) //&&(bb))
+	{
+		write_cursor(20);
 		write_text_sel(6,20,252,text_str_reset);
+	}
 	else
 		write_text(6,20,text_str_reset);
 
 	if ((c==8)) //&&(bb))
+	{
+		write_cursor(22);
 		write_text_sel(6,22,252,text_str_run);
+	}
 	else
 		write_text(6,22,text_str_run);
 
 	write_text(6,23,text_str_separator);
 	write_text(6,24,text_str_separator);
 	if ((c==9)) //&&(bb))
+	{
+		write_cursor(25);
 		write_text_sel(6,25,252,text_str_exit);
+	}
 	else
 		write_text(6,25,text_str_exit);
 //	write_text(6,26,text_str_separator);
@@ -567,6 +590,16 @@ int run_mainMenu()
 	static int c=8;
 	int end,need_reset=-1;
 	mainMenu_case=-1;
+#ifdef AUTORUN
+	/* Skip menu entirely — boot directly with fixed defaults. */
+	neogeo_adjust_frameskip(0);
+	neogeo_adjust_cycles(menuCPU_68k, menuCPU_z80);
+#if defined(DREAMCAST) && !defined(AES)
+	if (!try_to_list_files())
+		return -1;
+#endif
+	return 1;
+#endif /* AUTORUN */
 #ifdef DREAMCAST
 	SDL_DC_VerticalWait(SDL_FALSE);
 #endif

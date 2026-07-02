@@ -742,11 +742,6 @@ void video_flip(SDL_Surface *surface)
 		console_draw_all_background();
   }
 #endif
-  glClearColor( 0.0,0.0,0.0, 255.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  extern GLint screen_texture;
-
   tile_z=0.5;
 
 #ifdef MENU_ALPHA
@@ -754,56 +749,80 @@ void video_flip(SDL_Surface *surface)
   video_draw_font_textures_gl();
 #endif
 
+#ifdef DREAMCAST
+  /* GLdc 1.1.0 glTexImage2D rejects every format+type combination we need
+     for the 512x512 screen texture (GL_INVALID_VALUE in a loop → black screen).
+     Bypass GLdc entirely: copy the SDL surface (ARGB1555, sysRAM) to a
+     dedicated VRAM buffer and render a full-screen opaque quad via PVR direct,
+     exactly like the game-frame sprite path. */
+  /* PVR_TEXTURE_MODULO (stride register) is initialized to 0 by KOS and
+     never changed.  NONTWIDDLED (stride mode) with stride=0 is undefined on
+     real HW — Flycast treats it as twiddled read, producing alternating
+     black/content rows.  The stride register's 5-bit field only represents
+     1-31 × 32 B = 32-992 B; a 512-pixel-wide texture needs 1024 B, which
+     overflows to 0.  Solution: twiddle the texture into Morton order and
+     declare it as twiddled — the PVR's Morton decoder then maps UV
+     coordinates correctly with no stride register needed.
+     pvr_txr_load_ex() reads the SDL surface (linear 16bpp, 512×512) from
+     sysRAM and writes it twiddled to VRAM using store queues. */
+  pvr_wait_ready();
+  pvr_txr_load_ex(neo4all_texture_surface, neo4all_screen_pvr_buffer,
+                  512, 512, PVR_TXRLOAD_16BPP);
+
+  pvr_poly_cxt_t scxt;
+  pvr_poly_cxt_txr(&scxt, PVR_LIST_OP_POLY,
+                   PVR_TXRFMT_ARGB1555,
+                   512, 512, neo4all_screen_pvr_buffer, PVR_FILTER_NONE);
+  pvr_poly_hdr_t shdr;
+  pvr_poly_compile(&shdr, &scxt);
+
+  pvr_set_bg_color(0.0f, 0.0f, 0.0f);
+  pvr_scene_begin();
+  pvr_list_begin(PVR_LIST_OP_POLY);
+  pvr_prim(&shdr, sizeof(shdr));
+
+  /* 320x240 texture in the top-left of the 512x512 surface.
+     +4 y-offset: top 4 screen rows are background-plane black;
+     bottom 4 rows of the Neo Geo image clip at screen y=240. */
+  const float su_r = 320.0f / 512.0f, sv_b = 240.0f / 512.0f;
+  const float sx1 = 0.0f, sy1 = 4.0f, sx2 = 320.0f, sy2 = 244.0f;
+  const float sz = 0.5f;
+
+  pvr_vertex_t sv;
+  sv.flags = PVR_CMD_VERTEX; sv.argb = 0xFFFFFFFF; sv.oargb = 0;
+
+  sv.x=sx1; sv.y=sy1; sv.z=sz; sv.u=0.0f;  sv.v=0.0f;  pvr_prim(&sv, sizeof(sv));
+  sv.x=sx2; sv.y=sy1; sv.z=sz; sv.u=su_r;  sv.v=0.0f;  pvr_prim(&sv, sizeof(sv));
+  sv.x=sx1; sv.y=sy2; sv.z=sz; sv.u=0.0f;  sv.v=sv_b;  pvr_prim(&sv, sizeof(sv));
+  sv.flags = PVR_CMD_VERTEX_EOL;
+  sv.x=sx2; sv.y=sy2; sv.z=sz; sv.u=su_r;  sv.v=sv_b;  pvr_prim(&sv, sizeof(sv));
+
+  pvr_list_finish();
+  pvr_scene_finish();
+#else
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  extern GLint screen_texture;
   glBindTexture(GL_TEXTURE_2D,screen_texture);
   loadTextureParams();
 
 #ifdef MENU_ALPHA
-
-#ifndef DREAMCAST
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
+  glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0,
     GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, neo4all_texture_surface);
 #else
-  glTexImage2D(GL_TEXTURE_2D, 0, 4, 512, 512, 0, 
-    GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, neo4all_texture_surface);
-#endif
-
-#else
-
-#ifndef DREAMCAST
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, 512, 512, 0, 
-    GL_RGB, GL_UNSIGNED_SHORT_5_6_5, neo4all_texture_surface);
-#else
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, 512, 512, 0, 
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, 512, 512, 0,
     GL_RGB, GL_UNSIGNED_SHORT_5_6_5, neo4all_texture_surface);
 #endif
 
-#endif
-
-  /* Neo Geo image: 320×240 pixels in the top-left of a 512×512 texture.
-     u_right=320/512, v_bottom=240/512.  Explicit coords avoid relying on
-     GLdc vertex clipping to recover correct texcoords at the right/bottom
-     edges — GLdc does not guarantee interpolation past the viewport boundary.
-     DC: +4 logical-pixel y-offset shifts the image down for CRT overscan
-     (top 4 rows of screen empty; bottom 4 rows of Neo Geo image clipped
-     at glOrtho y=240 — intentional Chui behavior). */
-  double t_x1=0.0, t_x2=320.0;
-  double t_y1=0.0, t_y2=240.0;
-#ifdef DREAMCAST
-  t_y1+=4.0; t_y2+=4.0;
-#endif
   const double u_r=320.0/512.0, v_b=240.0/512.0;
-
   glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(t_x1, t_y1, tile_z);
-    glTexCoord2f(u_r, 0.0); glVertex3f(t_x2, t_y1, tile_z);
-    glTexCoord2f(u_r, v_b); glVertex3f(t_x2, t_y2, tile_z);
-    glTexCoord2f(0.0, v_b); glVertex3f(t_x1, t_y2, tile_z);
+    glTexCoord2f(0.0, 0.0); glVertex3f(0.0,   0.0,   tile_z);
+    glTexCoord2f(u_r, 0.0); glVertex3f(320.0, 0.0,   tile_z);
+    glTexCoord2f(u_r, v_b); glVertex3f(320.0, 240.0, tile_z);
+    glTexCoord2f(0.0, v_b); glVertex3f(0.0,   240.0, tile_z);
   glEnd();
 
-#ifndef DREAMCAST
   SDL_GL_SwapBuffers();
-#else
-  glKosSwapBuffers();
 #endif
   used_blitter=0;
 #endif

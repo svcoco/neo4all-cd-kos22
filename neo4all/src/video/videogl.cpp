@@ -49,6 +49,9 @@ void *neo4all_texture_real_buffer=NULL;
 void *neo4all_font_real_buffer=NULL;
 void *neo4all_texture_surface=NULL;
 void *neo4all_black_texture_buffer=NULL;
+#ifdef DREAMCAST
+void *neo4all_screen_pvr_buffer=NULL;
+#endif
 float tile_z=TILE_Z_INIT;
 unsigned neo4all_glframes=8;
 
@@ -127,17 +130,18 @@ static void pvr_prealloc_neo4all_textures(void) {
     };
     pvr_init(&params);
 
-    /* tiles + fonts + black border texture in one PVR block: all three are
-       referenced as txr.base by the direct-PVR render path and must live in
-       VRAM (draw_tile.s/draw_font.s write them via store queues; the black
-       texture is CPU-filled once in neo4all_black_texture()). */
+    /* Single VRAM block: tiles | fonts | black border | screen texture
+       Tiles/fonts/black: written by PVR direct (draw_tile.s, draw_font.s, store queues).
+       Screen texture (512x512 ARGB1555): destination for pvr_txr_load() in video_flip(). */
     void *raw = pvr_mem_malloc((16*16*2 * TCACHE_SIZE) + (8*8*2 * FCACHE_SIZE)
-                               + (16*16*2));
+                               + (16*16*2) + (512*512*2));
     if (raw) {
         neo4all_texture_real_buffer  = raw;
         neo4all_font_real_buffer     = (void *)((unsigned)raw + 16*16*2 * TCACHE_SIZE);
         neo4all_black_texture_buffer = (void *)((unsigned)neo4all_font_real_buffer
                                                 + 8*8*2 * FCACHE_SIZE);
+        neo4all_screen_pvr_buffer    = (void *)((unsigned)neo4all_black_texture_buffer
+                                                + 16*16*2);
     }
     /* Framebuffer surface in sysRAM: CPU-written, uploaded to GLdc's VRAM
        pool via glTexImage2D each frame. */
@@ -235,8 +239,16 @@ SDL_bool init_video_gl(void) {
 #endif
     SDL_FillRect(screen,NULL,0x8000);
 #else
-    screen = SDL_CreateRGBSurfaceFrom(neo4all_texture_surface, 320, 240, 16, 1024 , 0xF800, 0x7E0, 0x1F, 0);
-    SDL_FillRect(screen,NULL,0);
+#ifdef DREAMCAST
+    /* GLdc 1.1.0 mishandles GL_UNSIGNED_SHORT_5_6_5 (RGB565), producing channel-swapped
+       colours.  Use ARGB1555 instead: GLdc maps GL_UNSIGNED_SHORT_1_5_5_5_REV directly
+       to the PVR's native ARGB1555 format (A=bit15, R=14:10, G=9:5, B=4:0). */
+    screen = SDL_CreateRGBSurfaceFrom(neo4all_texture_surface, 320, 240, 16, 1024, 0x7C00, 0x3E0, 0x1F, 0x8000);
+    SDL_FillRect(screen, NULL, 0);
+#else
+    screen = SDL_CreateRGBSurfaceFrom(neo4all_texture_surface, 320, 240, 16, 1024, 0xF800, 0x7E0, 0x1F, 0);
+    SDL_FillRect(screen, NULL, 0);
+#endif
 #endif
 
     glGenTextures(1,(GLuint *)&screen_texture);
