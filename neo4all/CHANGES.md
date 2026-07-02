@@ -80,8 +80,21 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 **`char fullmode` → `int` en draw.cpp**
 - `video_draw_screen1()`: `char fullmode` → `int fullmode`. Evita sign-extension en comparaciones en SH4.
 
-**Nota sobre `USE_SQ`**
-- `USE_SQ=1` causa corrupción de sprites en DC: `draw_tile.s` ya usa store queues internamente (calcula QACR0 y la dirección P4 a partir del puntero VRAM pasado). Activar `USE_SQ` hace que `create_tile()` pase `neo4all_texture_buffer` (sysRAM) en lugar de la dirección VRAM, produciendo un mapeo SQ incorrecto. El flag está diseñado para la versión C de `draw_tile` (non-DC); en DC no debe activarse.
+---
+
+### Intentos fallidos (verificados en hardware real)
+
+**`USE_SQ=1` — Corrupción total de sprites**
+- Efecto en hardware: sprites completamente corruptos; 5fps en Flycast.
+- Causa: `draw_tile.s` ya implementa el copy a VRAM via store queues internamente. El código assembly toma el puntero `br` (dirección VRAM), calcula `QACR0 = (addr >> 26) & 0x1C` y la dirección SQ `= 0xe0000000 | (addr & 0x03ffffe0)`, y escribe via P4. Con `USE_SQ=1` activado, `create_tile()` le pasa `neo4all_texture_buffer` (sysRAM, `0x8Cxxxxxx`) en lugar de la dirección VRAM, produciendo QACR0 incorrecto y escritura al offset VRAM equivocado. Además, `pvr_txr_load()` posterior copia el buffer sysRAM (vacío, no fue escrito) sobre la VRAM correcta. El flag `USE_SQ` fue diseñado para la versión C de `draw_tile` (non-DC); en DC no debe activarse nunca.
+
+**`CACHE_INLINE=1` — Thrashing de I-cache, regresión grave de FPS**
+- Efecto en hardware: 24–34fps (caída desde 46–57fps de base).
+- Causa: `videogl.cpp` define internamente `CACHE_STATIC_INLINE` como vacío cuando `CACHE_INLINE` no viene del entorno, convirtiendo las funciones de caché en funciones normales exportadas. Al activar `CACHE_INLINE=1` en `config.mk`, `CACHE_STATIC_INLINE` pasa a ser `static __inline__`, forzando la expansión inline de `tcache_hash_insert` y `tcache_hash_old_cleaner` (loop de 512 buckets × chain walk) directamente dentro del hot path `video_draw_spr`. El SH4 del Dreamcast tiene I-cache de 8KB direct-mapped (256 líneas de 32 bytes); el code-bloat resultante la satura, causando thrashing constante en el loop de render. El código del cleaner, aunque se ejecuta raramente, ocupa líneas de I-cache que desplazan al código del camino caliente.
+
+**`TCACHE_BREAKTIME / FCACHE_BREAKTIME` 16→32 — Doble trabajo del cleaner**
+- Efecto: contribuye a la regresión de FPS (fue revertido junto con `CACHE_INLINE`).
+- Causa: al aumentar el tiempo de retención de tiles en caché de 16 a 32 frames, cuando el pool de slots libres se agota, `tcache_hash_old_cleaner(32)` no encuentra tiles suficientemente viejos para evictar y cae al fallback `tcache_hash_old_cleaner(1)`. Resultado: el cleaner (O(TCACHE_SIZE)) se ejecuta dos veces por evento de pool-exhaustion en lugar de una. Con BREAKTIME=16 original, la primera llamada libera tiles de frames 17+ y frecuentemente es suficiente.
 
 ---
 
