@@ -1131,6 +1131,21 @@ void	neogeo_run(void)
 #if defined(AES) && defined(DREAMCAST) && !defined(AES_PREFETCHING)
 		current_mmu_frame=now_mmu_frame+1;
 #endif
+
+#ifdef DREAMCAST
+		{
+			static uint32_t _fps_frames = 0;
+			static uint32_t _fps_t0 = 0;
+			_fps_frames++;
+			uint32_t _now = SDL_GetTicks();
+			if (_fps_t0 == 0) _fps_t0 = _now;
+			if (_now - _fps_t0 >= 1000) {
+				vmu_printf("FPS\n%u", (unsigned)_fps_frames);
+				_fps_frames = 0;
+				_fps_t0 = _now;
+			}
+		}
+#endif
 	}
 	// Stop CDDA
 	cdda_stop();
