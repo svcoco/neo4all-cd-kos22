@@ -4,14 +4,14 @@
 extern unsigned neo4all_glframes;
 extern char	video_palette_use[0x200];
 
-#define FCACHE_HASH_SIZE 127
+#define FCACHE_HASH_SIZE 128
 #define FCACHE_SIZE 2048
 //#define FCACHE_SIZE 1024
 
-#define FCACHE_BREAKTIME 16
+#define FCACHE_BREAKTIME 32
 
 #define fcache_compEq(a,b) (a == b)
-#define fcache_hash(key) (key % FCACHE_HASH_SIZE)
+#define fcache_hash(key) ((key) & (FCACHE_HASH_SIZE - 1))
 
 typedef void * fcache_rec_t;
 
@@ -141,7 +141,7 @@ CACHE_STATIC_INLINE fcache_rec_t fcache_hash_insert(unsigned key)
 	
 	if (!first_font)
 	{
-		fcache_hash_old_cleaner(TCACHE_BREAKTIME);
+		fcache_hash_old_cleaner(FCACHE_BREAKTIME);
 		if (!first_font)
 		{
 			fcache_hash_old_cleaner(1);

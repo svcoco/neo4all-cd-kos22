@@ -4,15 +4,15 @@
 extern unsigned neo4all_glframes;
 extern char	video_palette_use[0x200];
 
-#define TCACHE_HASH_SIZE 701
+#define TCACHE_HASH_SIZE 512
 #define TCACHE_SIZE 7680
 //#define TCACHE_HASH_SIZE 521
 //#define TCACHE_SIZE 4096
 
-#define TCACHE_BREAKTIME 16
+#define TCACHE_BREAKTIME 32
 
 #define tcache_compEq(a,b) (a == b)
-#define tcache_hash(key) (key % TCACHE_HASH_SIZE)
+#define tcache_hash(key) ((key) & (TCACHE_HASH_SIZE - 1))
 
 typedef void * tcache_rec_t;
 

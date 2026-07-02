@@ -953,7 +953,7 @@ void	neogeo_run(void)
 				_z80raise(0);
 				{
     				int	i;
-				int zc=neo4all_z80_cycles/NEOGEO_NB_INTERLACE;
+				int zc=my_z80_cycles/NEOGEO_NB_INTERLACE;
 				for (i = 0; i < NEOGEO_NB_INTERLACE; i++) {
 					_z80exec(zc);
 					my_timer();
@@ -1009,7 +1009,7 @@ void	neogeo_run(void)
 		    }
 		}
 		
-		memcard_update();
+		if (!(neogeo_frameskip_count & 0x3F)) memcard_update();
 
 #ifdef DEBUG_FRAMESKIP
 		total_frames++;

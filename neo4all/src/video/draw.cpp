@@ -186,7 +186,7 @@ void video_draw_screen1()
    int         sx =0,sy =0,oy =0,my =0,zx = 1, rzy = 1; 
    int         offs,i,count,y; 
    int         tileno,tileatr,t1,t2,t3; 
-   char         fullmode=0; 
+   int          fullmode=0;
    int         ddax=0,dday=0,rzx=15,yskip=0; 
 
    if (!neo4all_skip_next_frame)
@@ -418,7 +418,7 @@ void video_draw_screen2()
    int         sx =0,sy =0,oy =0,my =0,zx = 1, rzy = 1; 
    int         offs,i,count,y; 
    int         tileno,tileatr,t1,t2,t3; 
-   char         fullmode=0; 
+   int          fullmode=0;
    int         ddax=0,dday=0,rzx=15,yskip=0; 
 
    if (!neo4all_skip_next_frame)
