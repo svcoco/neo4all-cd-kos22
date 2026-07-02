@@ -82,15 +82,17 @@ static pvr_dr_state_t  dr_state;
 
 static __inline__ void prepare_pvr_init(void)
 {
-	gl_poly_cxt.txr.filter= neo4all_pvr_filter;
+	/* Same rationale as sprgl.cpp: gl_poly_cxt must be fully initialized
+	   now that it is our own instance instead of KGL's live context.
+	   draw_font.s stores texels linearly in VRAM → NONTWIDDLED. */
+	pvr_poly_cxt_txr(&gl_poly_cxt, PVR_LIST_TR_POLY,
+	                 PVR_TXRFMT_ARGB1555 | PVR_TXRFMT_NONTWIDDLED,
+	                 8, 8, NULL, neo4all_pvr_filter);
 	gl_poly_cxt.gen.alpha = PVR_ALPHA_DISABLE;
 	gl_poly_cxt.txr.alpha = PVR_TXRALPHA_ENABLE;
 	gl_poly_cxt.blend.src = PVR_BLEND_SRCALPHA; //PVR_BLEND_ONE;
 	gl_poly_cxt.blend.dst = PVR_BLEND_INVSRCALPHA; //PVR_BLEND_ZERO;
 	gl_poly_cxt.gen.culling = PVR_CULLING_NONE;
-	gl_poly_cxt.txr.width = 8;
-	gl_poly_cxt.txr.height = 8;
-	gl_poly_cxt.txr.format = PVR_TXRFMT_ARGB1555;
 }
 
 static __inline__ void prepare_pvr_per_font(void *texture_mem)

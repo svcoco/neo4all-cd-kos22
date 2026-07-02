@@ -93,11 +93,10 @@ static void init_cache(void) {
 
 static void free_cache(void) {
 #ifdef DREAMCAST
-    /* tile+font: single pvr_mem block, font_real_buffer points inside it */
+    /* tile+font+black: single pvr_mem block, font/black pointers are inside it */
     pvr_mem_free(neo4all_texture_real_buffer);
-    /* sysRAM allocations from pvr_prealloc_neo4all_textures() */
+    /* sysRAM allocation from pvr_prealloc_neo4all_textures() */
     free(neo4all_texture_surface);
-    free(neo4all_black_texture_buffer);
 #else
     free(neo4all_texture_real_buffer);
     free(neo4all_font_real_buffer);
@@ -128,15 +127,21 @@ static void pvr_prealloc_neo4all_textures(void) {
     };
     pvr_init(&params);
 
-    void *raw = pvr_mem_malloc((16*16*2 * TCACHE_SIZE) + (8*8*2 * FCACHE_SIZE));
+    /* tiles + fonts + black border texture in one PVR block: all three are
+       referenced as txr.base by the direct-PVR render path and must live in
+       VRAM (draw_tile.s/draw_font.s write them via store queues; the black
+       texture is CPU-filled once in neo4all_black_texture()). */
+    void *raw = pvr_mem_malloc((16*16*2 * TCACHE_SIZE) + (8*8*2 * FCACHE_SIZE)
+                               + (16*16*2));
     if (raw) {
-        neo4all_texture_real_buffer = raw;
-        neo4all_font_real_buffer    = (void *)((unsigned)raw + 16*16*2 * TCACHE_SIZE);
+        neo4all_texture_real_buffer  = raw;
+        neo4all_font_real_buffer     = (void *)((unsigned)raw + 16*16*2 * TCACHE_SIZE);
+        neo4all_black_texture_buffer = (void *)((unsigned)neo4all_font_real_buffer
+                                                + 8*8*2 * FCACHE_SIZE);
     }
-    /* Framebuffer and scratch surfaces in sysRAM: CPU-written, uploaded to
-       GLdc's VRAM pool via glTexImage2D each frame. */
+    /* Framebuffer surface in sysRAM: CPU-written, uploaded to GLdc's VRAM
+       pool via glTexImage2D each frame. */
     neo4all_texture_surface      = calloc(512 * 512, 2);
-    neo4all_black_texture_buffer = calloc(16 * 16,   2);
     neo4all_texture_buffer_free  = calloc(64 + (16*16*2), 1);
     neo4all_texture_buffer = (void *)(((((unsigned)neo4all_texture_buffer_free)+32)/32)*32);
 }
@@ -155,23 +160,39 @@ static void gldc_init(void) {
 
 SDL_bool init_video_gl(void) {
 #ifdef DREAMCAST
-    pvr_prealloc_neo4all_textures();
-    gldc_init();
     {
+        /* KOS pvr_init() reads the CURRENT vid_mode (set by KOS startup at
+           DM_640x480 in hardware.c) to configure PVR tile matrices and
+           framebuffer stride.  We must call vid_set_mode() for the desired
+           resolution BEFORE pvr_prealloc_neo4all_textures() so that pvr_init()
+           picks it up.  Calling vid_set_mode AFTER pvr_init leaves pvr_state.w
+           at 640, causing pvr_misc.c to restore PVR_RENDER_MODULO to 1280 bytes
+           every frame while the video output reads 640 bytes/scanline — the
+           result is interleaved content/black scanlines that look like only the
+           top quarter of the display is active. */
         int cable = vid_check_cable();
         if (cable == CT_VGA) {
             neo4all_hw_width  = 640;
             neo4all_hw_height = 480;
             neo4all_scale_x   = 2.0f;
             neo4all_move_x    = 16.0f;
+            /* KOS startup already set DM_640x480 — no change needed */
         } else {
-            /* CT_RGB / CT_COMPOSITE / CT_NONE → 15 KHz cable: native 240p */
             neo4all_hw_width  = 320;
             neo4all_hw_height = 240;
             neo4all_scale_x   = 1.0f;
             neo4all_move_x    = 8.0f;
+            /* Set 320x240 NOW so pvr_init uses 10x8 tile grid and 640-byte stride */
+            vid_set_mode(DM_320x240, PM_RGB565);
         }
     }
+    pvr_prealloc_neo4all_textures();  /* pvr_init reads current vid_mode */
+    /* pvr_init() sets PVR_SCALER_CFG=0x401 on non-VGA cables ("vertical
+       smoothing"): the video scaler resamples adjacent lines to soften
+       interlace flicker.  In progressive 240p that interpolation only blurs
+       the picture — force exact 1.0 passthrough (0x400 = no filtering). */
+    PVR_SET(PVR_SCALER_CFG, 0x400);
+    gldc_init();
 #endif
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 1);

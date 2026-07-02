@@ -96,16 +96,20 @@ void blitter(void) {
 	1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #else
-  glClearColor(
-	((float)((video_paletteram_pc[4095]>>0)&0x1F))/31.0,
-	((float)((video_paletteram_pc[4095]>>5)&0x1F))/31.0,
-	((float)((video_paletteram_pc[4095]>>10)&0x1F))/31.0,
-	1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  /* DC game frame is rendered entirely with the direct PVR API (tiles,
+     fonts, borders all go through pvr_prim/pvr_dr in sprgl.cpp and
+     draw_fixgl.cpp).  GLdc defers every GL call until glKosSwapBuffers,
+     so those direct submissions would land with no PVR list open
+     ("pvr_prim: attempt to submit to unopened list") and nothing would be
+     drawn.  Open the scene and TR list natively instead of using GLdc;
+     the background color comes from the PVR background plane. */
   pvr_set_bg_color(
 	((float)((video_paletteram_pc[4095]>>10)&0x1F))/31.0,
 	((float)((video_paletteram_pc[4095]>>5)&0x1F))/31.0,
 	((float)((video_paletteram_pc[4095]>>0)&0x1F))/31.0);
+  pvr_wait_ready();
+  pvr_scene_begin();
+  pvr_list_begin(PVR_LIST_TR_POLY);
 #endif
 
   video_draw_tile_textures();
@@ -115,7 +119,8 @@ void blitter(void) {
 #ifndef DREAMCAST
     SDL_GL_SwapBuffers();
 #else
-    glKosSwapBuffers();
+    pvr_list_finish();
+    pvr_scene_finish();
 #endif
     neo4all_glframes++;
 #endif

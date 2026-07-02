@@ -104,15 +104,19 @@ static pvr_dr_state_t  dr_state;
 
 static __inline__ void prepare_pvr_init(void)
 {
-	gl_poly_cxt.txr.filter= neo4all_pvr_filter;
+	/* In the original build gl_poly_cxt was KGL's live internal context and
+	   arrived here with list_type/depth/fog already valid; GLdc has no such
+	   variable, so every field must be initialized.  pvr_poly_cxt_txr()
+	   supplies the KGL-era defaults (TR list, depth GREATER + write, fog
+	   off).  draw_tile.s stores texels linearly in VRAM → NONTWIDDLED. */
+	pvr_poly_cxt_txr(&gl_poly_cxt, PVR_LIST_TR_POLY,
+	                 PVR_TXRFMT_ARGB1555 | PVR_TXRFMT_NONTWIDDLED,
+	                 16, 16, NULL, neo4all_pvr_filter);
 	gl_poly_cxt.gen.alpha = PVR_ALPHA_DISABLE;
 	gl_poly_cxt.txr.alpha = PVR_TXRALPHA_ENABLE;
 	gl_poly_cxt.blend.src = PVR_BLEND_SRCALPHA; //PVR_BLEND_ONE;
 	gl_poly_cxt.blend.dst = PVR_BLEND_INVSRCALPHA; //PVR_BLEND_ZERO;
 	gl_poly_cxt.gen.culling = PVR_CULLING_NONE;
-	gl_poly_cxt.txr.width = 16;
-	gl_poly_cxt.txr.height = 16;
-	gl_poly_cxt.txr.format = PVR_TXRFMT_ARGB1555;
 }
 
 static __inline__ void prepare_pvr_per_tile(void *texture_mem)
