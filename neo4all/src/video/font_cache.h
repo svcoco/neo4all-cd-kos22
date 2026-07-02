@@ -8,7 +8,7 @@ extern char	video_palette_use[0x200];
 #define FCACHE_SIZE 2048
 //#define FCACHE_SIZE 1024
 
-#define FCACHE_BREAKTIME 32
+#define FCACHE_BREAKTIME 16
 
 #define fcache_compEq(a,b) (a == b)
 #define fcache_hash(key) ((key) & (FCACHE_HASH_SIZE - 1))

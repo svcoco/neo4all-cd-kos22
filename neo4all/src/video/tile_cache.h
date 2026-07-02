@@ -9,7 +9,7 @@ extern char	video_palette_use[0x200];
 //#define TCACHE_HASH_SIZE 521
 //#define TCACHE_SIZE 4096
 
-#define TCACHE_BREAKTIME 32
+#define TCACHE_BREAKTIME 16
 
 #define tcache_compEq(a,b) (a == b)
 #define tcache_hash(key) ((key) & (TCACHE_HASH_SIZE - 1))
