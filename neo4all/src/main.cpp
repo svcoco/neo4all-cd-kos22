@@ -907,37 +907,32 @@ void neogeo_adjust_fine_cycles(int new_68k, int new_z80)
 #ifdef DREAMCAST
 static void vmu_draw_fps(unsigned fps)
 {
-    /* 8x8 bitmap glyphs (1 byte per row, MSB = leftmost pixel).
-       Row 7 is always 0x00 to leave 1-pixel vertical gap between chars. */
-    static const uint8_t dg[10][8] = {
-        {0x3C,0x66,0x66,0x66,0x66,0x66,0x3C,0x00}, /* 0 */
-        {0x18,0x38,0x18,0x18,0x18,0x18,0x3C,0x00}, /* 1 */
-        {0x3C,0x66,0x06,0x0C,0x18,0x30,0x7E,0x00}, /* 2 */
-        {0x3C,0x66,0x06,0x1C,0x06,0x66,0x3C,0x00}, /* 3 */
-        {0x0C,0x1C,0x3C,0x6C,0x7E,0x0C,0x0C,0x00}, /* 4 */
-        {0x7E,0x60,0x7C,0x06,0x06,0x66,0x3C,0x00}, /* 5 */
-        {0x1C,0x30,0x60,0x7C,0x66,0x66,0x3C,0x00}, /* 6 */
-        {0x7E,0x06,0x0C,0x18,0x30,0x30,0x30,0x00}, /* 7 */
-        {0x3C,0x66,0x66,0x3C,0x66,0x66,0x3C,0x00}, /* 8 */
-        {0x3C,0x66,0x66,0x3E,0x06,0x0C,0x38,0x00}, /* 9 */
-    };
+    static unsigned  fps_min   = 255;
+    static unsigned  fps_max   = 0;
+    static uint32_t  fps_sum   = 0;
+    static uint16_t  fps_count = 0;
+
+    if (fps < fps_min) fps_min = fps;
+    if (fps > fps_max) fps_max = fps;
+    fps_sum += fps;
+    fps_count++;
+
+    unsigned fps_avg = fps_sum / fps_count;
 
     vmufb_t fb;
     vmufb_clear(&fb);
 
-    /* "FPS" label in default 4x6 font, centered at top */
-    vmufb_print_string_into(&fb, NULL, 18, 2, 12, 6, 0, "FPS");
-
-    /* Digits in 8x8, centered in lower half */
-    char buf[4];
-    int n = 0;
-    if (fps >= 100) buf[n++] = (char)('0' + fps / 100);
-    if (fps >= 10)  buf[n++] = (char)('0' + (fps / 10) % 10);
-    buf[n++] = (char)('0' + fps % 10);
-
-    int x = (48 - n * 8) / 2;
-    for (int i = 0; i < n; i++)
-        vmufb_paint_area(&fb, x + i * 8, 13, 8, 8, dg[(int)(buf[i] - '0')]);
+    /* 4 lines of 4x6 text, each string "XXX:NN" = 6 chars = 24px, centered at x=12
+       y spacing: 1, 9, 17, 25 (6px text + 2px gap), last line ends at y=31 */
+    char line[10];
+    snprintf(line, sizeof(line), "CUR:%2u", fps);
+    vmufb_print_string_into(&fb, NULL, 12, 1, 24, 6, 0, line);
+    snprintf(line, sizeof(line), "MIN:%2u", fps_min);
+    vmufb_print_string_into(&fb, NULL, 12, 9, 24, 6, 0, line);
+    snprintf(line, sizeof(line), "MAX:%2u", fps_max);
+    vmufb_print_string_into(&fb, NULL, 12, 17, 24, 6, 0, line);
+    snprintf(line, sizeof(line), "AVG:%2u", fps_avg);
+    vmufb_print_string_into(&fb, NULL, 12, 25, 24, 6, 0, line);
 
     maple_device_t *dev;
     for (int p = 0; (dev = maple_enum_type(p, MAPLE_FUNC_LCD)) != NULL; p++)
