@@ -904,6 +904,47 @@ void neogeo_adjust_fine_cycles(int new_68k, int new_z80)
 #endif
 
 
+#ifdef DREAMCAST
+static void vmu_draw_fps(unsigned fps)
+{
+    /* 8x8 bitmap glyphs (1 byte per row, MSB = leftmost pixel).
+       Row 7 is always 0x00 to leave 1-pixel vertical gap between chars. */
+    static const uint8_t dg[10][8] = {
+        {0x3C,0x66,0x66,0x66,0x66,0x66,0x3C,0x00}, /* 0 */
+        {0x18,0x38,0x18,0x18,0x18,0x18,0x3C,0x00}, /* 1 */
+        {0x3C,0x66,0x06,0x0C,0x18,0x30,0x7E,0x00}, /* 2 */
+        {0x3C,0x66,0x06,0x1C,0x06,0x66,0x3C,0x00}, /* 3 */
+        {0x0C,0x1C,0x3C,0x6C,0x7E,0x0C,0x0C,0x00}, /* 4 */
+        {0x7E,0x60,0x7C,0x06,0x06,0x66,0x3C,0x00}, /* 5 */
+        {0x1C,0x30,0x60,0x7C,0x66,0x66,0x3C,0x00}, /* 6 */
+        {0x7E,0x06,0x0C,0x18,0x30,0x30,0x30,0x00}, /* 7 */
+        {0x3C,0x66,0x66,0x3C,0x66,0x66,0x3C,0x00}, /* 8 */
+        {0x3C,0x66,0x66,0x3E,0x06,0x0C,0x38,0x00}, /* 9 */
+    };
+
+    vmufb_t fb;
+    vmufb_clear(&fb);
+
+    /* "FPS" label in default 4x6 font, centered at top */
+    vmufb_print_string_into(&fb, NULL, 18, 2, 12, 6, 0, "FPS");
+
+    /* Digits in 8x8, centered in lower half */
+    char buf[4];
+    int n = 0;
+    if (fps >= 100) buf[n++] = (char)('0' + fps / 100);
+    if (fps >= 10)  buf[n++] = (char)('0' + (fps / 10) % 10);
+    buf[n++] = (char)('0' + fps % 10);
+
+    int x = (48 - n * 8) / 2;
+    for (int i = 0; i < n; i++)
+        vmufb_paint_area(&fb, x + i * 8, 13, 8, 8, dg[(int)(buf[i] - '0')]);
+
+    maple_device_t *dev;
+    for (int p = 0; (dev = maple_enum_type(p, MAPLE_FUNC_LCD)) != NULL; p++)
+        vmufb_present(&fb, dev);
+}
+#endif
+
 //----------------------------------------------------------------------------
 void	neogeo_run(void)
 {
@@ -1140,7 +1181,7 @@ void	neogeo_run(void)
 			uint32_t _now = SDL_GetTicks();
 			if (_fps_t0 == 0) _fps_t0 = _now;
 			if (_now - _fps_t0 >= 1000) {
-				vmu_printf("FPS\n%u", (unsigned)_fps_frames);
+				vmu_draw_fps((unsigned)_fps_frames);
 				_fps_frames = 0;
 				_fps_t0 = _now;
 			}
