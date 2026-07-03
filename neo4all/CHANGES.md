@@ -93,6 +93,10 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 - Efecto: contribuye a la regresión de FPS (fue revertido junto con `CACHE_INLINE`).
 - Causa: al aumentar el tiempo de retención de tiles en caché de 16 a 32 frames, cuando el pool de slots libres se agota, `tcache_hash_old_cleaner(32)` no encuentra tiles suficientemente viejos para evictar y cae al fallback `tcache_hash_old_cleaner(1)`. Resultado: el cleaner (O(TCACHE_SIZE)) se ejecuta dos veces por evento de pool-exhaustion en lugar de una. Con BREAKTIME=16 original, la primera llamada libera tiles de frames 17+ y frecuentemente es suficiente.
 
+**`FM_INLINE=1` — AVG -2fps, MAX -4fps pese a reducción de código**
+- Efecto en hardware: MIN 35 / MAX 56 / AVG 45fps (vs TCACHE 2048: MIN 30 / MAX 60 / AVG 47fps). MIN mejoró +5fps pero AVG bajó -2fps y MAX bajó -4fps.
+- El ELF con FM_INLINE es 2KB más pequeño (fm.o -6.4KB): 19 funciones `static inline` eliminan sus copias standalone tras constant folding — sin expansión de código. Sin embargo, el hilo de audio con FM inlineado altera la contención con el hilo de video bajo el scheduler single-core del SH4; en momentos tranquilos del fight ya no alcanza 60fps (MAX 56 vs 60). Neto negativo respecto al mejor estado (TCACHE 2048).
+
 **`FCACHE_HASH_SIZE` 256 → 512 — Regresión grave de AVG**
 - Efecto en hardware: AVG 41fps (vs AVG 47fps con TCACHE 2048 activo). Caída de 6fps en AVG, MAX bajó de 60 a 57fps.
 - Causa: con TCACHE 2048 (8KB de tabla) + FCACHE 512 (2KB de tabla) el total de tablas de punteros asciende a 10KB — supera la D-cache de 8KB del SH4. Las dos tablas compiten entre sí y con los arrays de nodos por los mismos sets de cache, causando conflictos sistémicos. FCACHE 256 (1KB) es el límite viable junto con TCACHE 2048.
