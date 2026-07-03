@@ -907,17 +907,28 @@ void neogeo_adjust_fine_cycles(int new_68k, int new_z80)
 #ifdef DREAMCAST
 static void vmu_draw_fps(unsigned fps)
 {
-    static unsigned  fps_min   = 255;
-    static unsigned  fps_max   = 0;
-    static uint32_t  fps_sum   = 0;
-    static uint16_t  fps_count = 0;
+    static unsigned  fps_min     = 255;
+    static unsigned  fps_max     = 0;
+    static uint32_t  fps_sum     = 0;
+    static uint16_t  fps_count   = 0;
+    static uint32_t  start_ticks = 0;
+    static bool      reset_done  = false;
+
+    if (start_ticks == 0) start_ticks = SDL_GetTicks();
+
+    /* one-shot reset at T+60s: discards pre-fight screens (character select,
+       VS screen) that inflate the average with 60fps stable samples */
+    if (!reset_done && (SDL_GetTicks() - start_ticks) >= 60000) {
+        fps_min = 255; fps_max = 0; fps_sum = 0; fps_count = 0;
+        reset_done = true;
+    }
 
     if (fps < fps_min) fps_min = fps;
     if (fps > fps_max) fps_max = fps;
     fps_sum += fps;
     fps_count++;
 
-    unsigned fps_avg = fps_sum / fps_count;
+    unsigned fps_avg = fps_count ? fps_sum / fps_count : fps;
 
     vmufb_t fb;
     vmufb_clear(&fb);
