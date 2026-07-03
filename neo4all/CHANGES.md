@@ -119,15 +119,31 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 
 ---
 
+### Resumen de optimizaciones evaluadas en hardware (fase 2)
+
+Baseline de referencia: MIN 39 / MAX 60 / **AVG 45fps** (medición acumulada post-reset 30s, primera pelea completa).
+
+| Cambio | MIN | MAX | AVG | Delta AVG | Estado |
+|--------|-----|-----|-----|-----------|--------|
+| Baseline | 39 | 60 | 45 | — | Referencia |
+| TCACHE 2048 buckets | 30 | 60 | **47** | **+2fps** | ✅ Activo |
+| FM_INLINE=1 | 35 | 56 | 45 | -2fps | ❌ Revertido |
+| FCACHE 512 buckets | 30 | 57 | 41 | -6fps | ❌ Revertido |
+| `pref` prefetch chain walk | 32 | 61 | 42 | -3fps | ❌ Revertido |
+| Struct reorder + aligned(32) | 31 | 61 | 45 | 0fps | ❌ Revertido |
+| `-O3` en sprgl.cpp | 30 | 58 | 40 | -5fps | ❌ Revertido |
+
+**Resultado neto fase 2: AVG 47fps (+2fps sobre baseline)**. La D-cache direct-mapped de 8KB del SH4 rechaza cualquier cambio que introduce accesos adicionales a memoria o expande el footprint de código en el hot path de render. El único cambio efectivo fue reducir la longitud de chains del TCACHE (menos D-cache misses por lookup).
+
+---
+
 ## 4. Trabajo pendiente
 
+- **PVR DMA para tiles**: `USE_DMA=1` — requiere gestión de doble buffer para evitar tear. Potencial de liberar ciclos de CPU durante la transferencia VRAM.
 - **Menú de juego**: reimplementar como texto puro PVR (`bfont` / `vmufb_print_string`), sin SDL surface ni PNG. La implementación actual tiene corrupción de textura porque GLdc rechaza `GL_RGBA + GL_UNSIGNED_SHORT_1_5_5_5_REV`.
 - **Pantalla de Loading**: mismo problema de textura que el menú.
 - **`USE_SQ` para DC**: requeriría reescribir `draw_tile.s` para que acepte un buffer sysRAM y haga el SQ copy internamente, o cambiar `create_tile()` para manejar el caso DC por separado.
-- **`FM_INLINE=1`**: pendiente de evaluar impacto en tamaño/velocidad.
-- **`-O3`**: probar en módulos críticos (`sprgl.cpp`, `draw.cpp`, `draw_fixgl.cpp`).
 - **Auto-frameskip por estadísticas PVR**: usar `pvr_get_stats()` para ajuste dinámico.
-- **PVR DMA para tiles**: `USE_DMA=1` — requiere gestión de doble buffer para evitar tear.
 
 ---
 
