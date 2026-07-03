@@ -17,11 +17,11 @@
 static SDL_Surface *gl_screen;
 
 tcache_node_t *tcache_hash_table[TCACHE_HASH_SIZE];
-tcache_node_t cache_tile[TCACHE_SIZE];
+tcache_node_t cache_tile[TCACHE_SIZE] __attribute__((aligned(32)));
 tcache_node_t *first_tile, *last_tile;
 
 fcache_node_t *fcache_hash_table[FCACHE_HASH_SIZE];
-fcache_node_t cache_font[FCACHE_SIZE];
+fcache_node_t cache_font[FCACHE_SIZE] __attribute__((aligned(32)));
 fcache_node_t *first_font, *last_font;
 
 unsigned neo4all_filter=NEO4ALL_FILTER_NONE;

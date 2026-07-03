@@ -18,11 +18,11 @@ typedef void * tcache_rec_t;
 
 typedef struct tcache_nodeTag {
 	struct tcache_nodeTag *next;
-	unsigned used;
 	union{
 		unsigned key;
 		struct {unsigned short col, tileno;};
 	};
+	unsigned used;
 	tcache_rec_t rec;
 }tcache_node_t;
 
