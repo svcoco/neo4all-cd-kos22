@@ -93,6 +93,10 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 - Efecto: contribuye a la regresión de FPS (fue revertido junto con `CACHE_INLINE`).
 - Causa: al aumentar el tiempo de retención de tiles en caché de 16 a 32 frames, cuando el pool de slots libres se agota, `tcache_hash_old_cleaner(32)` no encuentra tiles suficientemente viejos para evictar y cae al fallback `tcache_hash_old_cleaner(1)`. Resultado: el cleaner (O(TCACHE_SIZE)) se ejecuta dos veces por evento de pool-exhaustion en lugar de una. Con BREAKTIME=16 original, la primera llamada libera tiles de frames 17+ y frecuentemente es suficiente.
 
+**`FCACHE_HASH_SIZE` 256 → 512 — Regresión grave de AVG**
+- Efecto en hardware: AVG 41fps (vs AVG 47fps con TCACHE 2048 activo). Caída de 6fps en AVG, MAX bajó de 60 a 57fps.
+- Causa: con TCACHE 2048 (8KB de tabla) + FCACHE 512 (2KB de tabla) el total de tablas de punteros asciende a 10KB — supera la D-cache de 8KB del SH4. Las dos tablas compiten entre sí y con los arrays de nodos por los mismos sets de cache, causando conflictos sistémicos. FCACHE 256 (1KB) es el límite viable junto con TCACHE 2048.
+
 **`pref` prefetch en chain walk de tcache/fcache — Regresión de AVG y MIN**
 - Efecto en hardware: MIN 32 / MAX 61 / AVG 42fps (vs baseline MIN 39 / MAX 60 / AVG 45fps). Percepción subjetiva de mayor lentitud confirmada.
 - Causa: en la D-cache direct-mapped de 8KB del SH4, precargar el nodo `p->next` mediante `pref @Rn` evicta los datos del nodo actual — con 120KB de `cache_tile` comprimidos en 8KB de cache, los nodos actuales y futuros casi siempre mapean al mismo set y se desplazan mutuamente. El resultado es pagar el costo de la instrucción `pref` (1 ciclo) más un miss adicional en el nodo actual, sin ocultar la latencia del miss futuro. La D-cache direct-mapped hace que el prefetch sea contraproducente en estructuras de datos enlazadas con acceso aleatorio.
