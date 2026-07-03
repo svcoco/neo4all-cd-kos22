@@ -214,10 +214,8 @@ CACHE_STATIC_INLINE tcache_rec_t tcache_hash_find(unsigned key)
 	tcache_node_t *p;
 
 	p = tcache_hash_table[tcache_hash(key)];
-	while (p && !tcache_compEq(p->key, key)) {
-		asm volatile("pref @%0" :: "r"(p->next));
+	while (p && !tcache_compEq(p->key, key))
 		p = p->next;
-	}
 	if (!p)
 		return NULL;
 	p->used=neo4all_glframes;

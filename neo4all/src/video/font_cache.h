@@ -212,10 +212,8 @@ CACHE_STATIC_INLINE fcache_rec_t fcache_hash_find(unsigned key)
 	fcache_node_t *p;
 
 	p = fcache_hash_table[fcache_hash(key)];
-	while (p && !fcache_compEq(p->key, key)) {
-		asm volatile("pref @%0" :: "r"(p->next));
+	while (p && !fcache_compEq(p->key, key))
 		p = p->next;
-	}
 	if (!p)
 		return NULL;
 	p->used=neo4all_glframes;
