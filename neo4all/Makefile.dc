@@ -66,6 +66,9 @@ else
 LIB_SDL= -lSDL_image -lSDL -lpng -lz
 endif
 
+src/video/sprgl.o: src/video/sprgl.cpp
+	kos-c++ $(KOS_CPPFLAGS) -O3 -c $< -o $@
+
 $(TARGET).elf: $(OBJS) $(Z80_OBJS) $(MEMORY_OBJ) $(OBJS_68K)
 	$(KOS_CC) $(KOS_CFLAGS) $(KOS_LDFLAGS) -o $(TARGET).elf $(KOS_START) \
 	$(OBJS) $(OBJS_68K) $(MEMORY_OBJ) $(Z80_OBJS) \
