@@ -50,8 +50,9 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 - `menu_main.cpp`: bloque `#ifdef AUTORUN` al inicio de `run_mainMenu()` — fija `frameskip=0`, región USA, y llama directamente a `try_to_list_files()` sin mostrar menú.
 - Resultado: el juego arranca directamente desde el disco sin interacción del usuario.
 
-**FPS en VMU — fuente 8×8**
-- `main.cpp`: función `vmu_draw_fps()` que usa `vmufb_*` API de KOS 2.2.x. Render 1×/segundo (cero impacto en rendimiento de gameplay). Layout: etiqueta "FPS" en fuente 4×6 default centrada arriba, dígitos en glyphs 8×8 propios centrados abajo. Se presenta en todos los VMUs conectados via `maple_enum_type` + `vmufb_present`.
+**FPS en VMU — estadísticas acumuladas**
+- `main.cpp`: función `vmu_draw_fps()` que usa `vmufb_*` API de KOS 2.2.x. Render 1×/segundo (cero impacto en rendimiento de gameplay). Layout: cuatro líneas de texto 4×6 con estadísticas acumuladas desde arranque: CUR (FPS actual), MIN (mínimo histórico), MAX (máximo histórico), AVG (promedio de todos los samples). Reset automático único a los 60s desde el primer sample — descarta las pantallas de carga, character select y VS screen (que corren a 60fps estables) antes de acumular datos de gameplay real. Se presenta en todos los VMUs conectados via `maple_enum_type` + `vmufb_present`.
+- **Baseline verificado en hardware** (primera pelea completa, post-reset): MIN 39fps / MAX 60fps / AVG 45fps. El MAX de 60fps confirma que el emulador alcanza el techo en momentos tranquilos del fight; el MIN de 39fps ocurre en combate intenso y no era capturable por estimación visual.
 
 **STDOUTPUT desactivado**
 - `config.mk`: `#STDOUTPUT=1` comentado — elimina todos los `console_printf`/`console_puts` del binario final.
