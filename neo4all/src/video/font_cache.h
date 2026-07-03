@@ -4,7 +4,7 @@
 extern unsigned neo4all_glframes;
 extern char	video_palette_use[0x200];
 
-#define FCACHE_HASH_SIZE 256
+#define FCACHE_HASH_SIZE 512
 #define FCACHE_SIZE 2048
 //#define FCACHE_SIZE 1024
 
