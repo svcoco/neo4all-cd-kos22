@@ -918,7 +918,7 @@ static void vmu_draw_fps(unsigned fps)
 
     /* one-shot reset at T+60s: discards pre-fight screens (character select,
        VS screen) that inflate the average with 60fps stable samples */
-    if (!reset_done && (SDL_GetTicks() - start_ticks) >= 60000) {
+    if (!reset_done && (SDL_GetTicks() - start_ticks) >= 30000) {
         fps_min = 255; fps_max = 0; fps_sum = 0; fps_count = 0;
         reset_done = true;
     }
