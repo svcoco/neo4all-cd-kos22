@@ -59,11 +59,11 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 - Requiere `make clean` para forzar recompilación completa (las flags de compilador no cambian timestamps de .o).
 
 **Tile/font cache — hash tables más grandes con XOR-fold**
-- `tile_cache.h`: `TCACHE_HASH_SIZE` 701 → 1024; `tcache_hash` = `((key)^(key>>16)) & 1023`.
+- `tile_cache.h`: `TCACHE_HASH_SIZE` 701 → 1024 → 2048; `tcache_hash` = `((key)^(key>>16)) & (TCACHE_HASH_SIZE-1)`.
 - `font_cache.h`: `FCACHE_HASH_SIZE` 127 → 256; `fcache_hash` = `((key)^(key>>16)) & 255`.
-- El factor dominante en el costo de lookup no es el `%` vs `&` (36 vs 1 ciclo) sino los **D-cache misses por chain walk**: cada nodo en la chain accede a una posición aleatoria en `cache_tile[7680]` (120KB), garantizando un miss en la D-cache de 8KB del SH4 (~50 ciclos/miss). Con 701 buckets el chain avg era 11 nodos; con 1024 es 7.5 — 32% menos misses. Con 127 buckets el chain avg de FCACHE era 16 nodos; con 256 es 8 — 50% menos.
-- El XOR-fold `(key ^ (key>>16))` mezcla los 16 bits altos (tileno/col) con los bajos (color/fontno), evitando que todas las variantes de color del mismo tile colapsen en el mismo bucket (problema de `key & mask` cuando los bits relevantes están en la mitad alta).
-- Resultado en hardware: 46–55fps (media 48–53fps) vs baseline 46–57fps (media 47–51fps). Mejora neta de 1–2fps.
+- El factor dominante en el costo de lookup no es el `%` vs `&` (36 vs 1 ciclo) sino los **D-cache misses por chain walk**: cada nodo en la chain accede a una posición aleatoria en `cache_tile[7680]` (120KB), garantizando un miss en la D-cache de 8KB del SH4 (~50 ciclos/miss). Con 701 buckets el chain avg era 11 nodos; con 1024 baja a 7.5; con 2048 baja a 3.75 — 50% menos misses respecto a 1024.
+- El XOR-fold `(key ^ (key>>16))` mezcla los 16 bits altos (tileno/col) con los bajos (color/fontno), evitando que todas las variantes de color del mismo tile colapsen en el mismo bucket.
+- Resultado acumulado verificado en hardware (AVG como métrica principal — MIN no comparable por cambio de timer de medición): AVG 47fps con TCACHE 2048 vs AVG 45fps baseline. Mejora neta de +2fps en promedio con percepción subjetiva de mejora confirmada.
 
 **Fix bug `my_z80_cycles`**
 - `main.cpp:~956`: el inner loop del Z80 usaba `neo4all_z80_cycles` directamente, ignorando `my_z80_cycles` (que implementa el overclock de los primeros 90 frames para acelerar la carga inicial). Corregido a `zc = my_z80_cycles / NEOGEO_NB_INTERLACE`.
