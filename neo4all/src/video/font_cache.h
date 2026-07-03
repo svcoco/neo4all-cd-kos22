@@ -17,11 +17,11 @@ typedef void * fcache_rec_t;
 
 typedef struct fcache_nodeTag {
 	struct fcache_nodeTag *next;
+	unsigned used;
 	union{
 		unsigned key;
 		struct {unsigned short col, fontno;};
 	};
-	unsigned used;
 	fcache_rec_t rec;
 }fcache_node_t;
 
