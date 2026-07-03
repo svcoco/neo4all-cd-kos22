@@ -50,26 +50,22 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 - `menu_main.cpp`: bloque `#ifdef AUTORUN` al inicio de `run_mainMenu()` — fija `frameskip=0`, región USA, y llama directamente a `try_to_list_files()` sin mostrar menú.
 - Resultado: el juego arranca directamente desde el disco sin interacción del usuario.
 
-**FPS en VMU**
-- `main.cpp`: bloque `#ifdef DREAMCAST` en `neogeo_run()` que cuenta frames por segundo y emite `vmu_printf("FPS\n%u", fps)` en todos los VMUs conectados, una vez por segundo.
+**FPS en VMU — fuente 8×8**
+- `main.cpp`: función `vmu_draw_fps()` que usa `vmufb_*` API de KOS 2.2.x. Render 1×/segundo (cero impacto en rendimiento de gameplay). Layout: etiqueta "FPS" en fuente 4×6 default centrada arriba, dígitos en glyphs 8×8 propios centrados abajo. Se presenta en todos los VMUs conectados via `maple_enum_type` + `vmufb_present`.
 
 **STDOUTPUT desactivado**
 - `config.mk`: `#STDOUTPUT=1` comentado — elimina todos los `console_printf`/`console_puts` del binario final.
 - Requiere `make clean` para forzar recompilación completa (las flags de compilador no cambian timestamps de .o).
 
-**Tile/font cache — hash power-of-two**
-- `tile_cache.h`: `TCACHE_HASH_SIZE` 701 → 512; `tcache_hash(key)` de `key % 701` a `(key) & 511`.
-- `font_cache.h`: `FCACHE_HASH_SIZE` 127 → 128; `fcache_hash(key)` de `key % 127` a `(key) & 127`.
-- En SH4, `%` sobre divisor no-PoT cuesta ~36 ciclos; `&` cuesta 1. La operación se ejecuta cientos de veces por frame.
-
-**Tile/font cache — tiempo de evicción**
-- `TCACHE_BREAKTIME` y `FCACHE_BREAKTIME`: 16 → 32 frames. Reduce los spikes de GC del caché.
-
-**CACHE_INLINE**
-- `config.mk`: `CACHE_INLINE=1` — las funciones de `tile_cache.h` y `font_cache.h` se generan como `static inline` en cada unidad de traducción que las incluye, en lugar de llamadas a función.
+**Tile/font cache — hash tables más grandes con XOR-fold**
+- `tile_cache.h`: `TCACHE_HASH_SIZE` 701 → 1024; `tcache_hash` = `((key)^(key>>16)) & 1023`.
+- `font_cache.h`: `FCACHE_HASH_SIZE` 127 → 256; `fcache_hash` = `((key)^(key>>16)) & 255`.
+- El factor dominante en el costo de lookup no es el `%` vs `&` (36 vs 1 ciclo) sino los **D-cache misses por chain walk**: cada nodo en la chain accede a una posición aleatoria en `cache_tile[7680]` (120KB), garantizando un miss en la D-cache de 8KB del SH4 (~50 ciclos/miss). Con 701 buckets el chain avg era 11 nodos; con 1024 es 7.5 — 32% menos misses. Con 127 buckets el chain avg de FCACHE era 16 nodos; con 256 es 8 — 50% menos.
+- El XOR-fold `(key ^ (key>>16))` mezcla los 16 bits altos (tileno/col) con los bajos (color/fontno), evitando que todas las variantes de color del mismo tile colapsen en el mismo bucket (problema de `key & mask` cuando los bits relevantes están en la mitad alta).
+- Resultado en hardware: 46–55fps (media 48–53fps) vs baseline 46–57fps (media 47–51fps). Mejora neta de 1–2fps.
 
 **Fix bug `my_z80_cycles`**
-- `main.cpp:~956`: el inner loop del Z80 usaba `neo4all_z80_cycles` directamente, ignorando `my_z80_cycles` (que implementa el overclock de los primeros 90 frames para acelerar la carga). Corregido a `zc = my_z80_cycles / NEOGEO_NB_INTERLACE`.
+- `main.cpp:~956`: el inner loop del Z80 usaba `neo4all_z80_cycles` directamente, ignorando `my_z80_cycles` (que implementa el overclock de los primeros 90 frames para acelerar la carga inicial). Corregido a `zc = my_z80_cycles / NEOGEO_NB_INTERLACE`.
 
 **Fix bug `fcache` usaba `TCACHE_BREAKTIME`**
 - `font_cache.h:144`: `fcache_hash_old_cleaner(TCACHE_BREAKTIME)` → `fcache_hash_old_cleaner(FCACHE_BREAKTIME)`.
@@ -95,6 +91,10 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 **`TCACHE_BREAKTIME / FCACHE_BREAKTIME` 16→32 — Doble trabajo del cleaner**
 - Efecto: contribuye a la regresión de FPS (fue revertido junto con `CACHE_INLINE`).
 - Causa: al aumentar el tiempo de retención de tiles en caché de 16 a 32 frames, cuando el pool de slots libres se agota, `tcache_hash_old_cleaner(32)` no encuentra tiles suficientemente viejos para evictar y cae al fallback `tcache_hash_old_cleaner(1)`. Resultado: el cleaner (O(TCACHE_SIZE)) se ejecuta dos veces por evento de pool-exhaustion en lugar de una. Con BREAKTIME=16 original, la primera llamada libera tiles de frames 17+ y frecuentemente es suficiente.
+
+**Hash PoT con tablas pequeñas (512/128 buckets) — Regresión por D-cache**
+- Efecto en hardware: 35–51fps con `& 511` (perf3), 39–50fps con XOR-fold `& 511` (perf4). Ambas configuraciones por debajo del baseline 46–57fps.
+- Causa: reducir el número de buckets de 701→512 (TCACHE) y 127→128 (FCACHE) alarga los chains. El factor dominante no es el costo del `%` (36 ciclos SH4) sino los D-cache misses por chain walk: cada nodo accede a una posición aleatoria en `cache_tile[7680]` (120KB), garantizando ~50 ciclos de miss en la D-cache de 8KB del SH4. Con 512 buckets el chain avg sube de 11 a 15 nodos: 4 nodos × 50 ciclos × 1000 lookups/frame = 200,000 ciclos adicionales/frame. El ahorro de `%`→`&` (35 ciclos × 1000 = 35,000 ciclos) no compensa. La solución correcta fue aumentar los buckets (1024/256), no sólo cambiar el operador.
 
 ---
 
