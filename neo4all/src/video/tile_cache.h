@@ -12,7 +12,7 @@ extern char	video_palette_use[0x200];
 #define TCACHE_BREAKTIME 16
 
 #define tcache_compEq(a,b) (a == b)
-#define tcache_hash(key) ((key) & (TCACHE_HASH_SIZE - 1))
+#define tcache_hash(key) (((key) ^ ((key) >> 16)) & (TCACHE_HASH_SIZE - 1))
 
 typedef void * tcache_rec_t;
 
