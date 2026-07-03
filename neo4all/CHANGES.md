@@ -93,6 +93,10 @@ La base de código original compilaba contra KOS ~1.2.x. Los cambios para compil
 - Efecto: contribuye a la regresión de FPS (fue revertido junto con `CACHE_INLINE`).
 - Causa: al aumentar el tiempo de retención de tiles en caché de 16 a 32 frames, cuando el pool de slots libres se agota, `tcache_hash_old_cleaner(32)` no encuentra tiles suficientemente viejos para evictar y cae al fallback `tcache_hash_old_cleaner(1)`. Resultado: el cleaner (O(TCACHE_SIZE)) se ejecuta dos veces por evento de pool-exhaustion en lugar de una. Con BREAKTIME=16 original, la primera llamada libera tiles de frames 17+ y frecuentemente es suficiente.
 
+**`-O3` en `sprgl.cpp` — Thrashing de I-cache, regresión grave de FPS**
+- Efecto en hardware: MIN 30 / MAX 58 / AVG 40fps (vs baseline MIN 39 / MAX 60 / AVG 45fps). Caída de 5fps en AVG y 9fps en MIN.
+- Causa: `-O3` activa loop unrolling e inlining agresivo, expandiendo el código compilado de `sprgl.cpp`. Como este módulo está en el hot path de render (se ejecuta cada frame por cada sprite en pantalla), el código expandido no cabe en los 8KB de I-cache direct-mapped del SH4, causando thrashing constante. El mismo mecanismo que destruyó el rendimiento con `CACHE_INLINE=1`. En módulos de render del SH4, `-O2` es superior a `-O3` porque mantiene el código compacto y cache-friendly.
+
 **Hash PoT con tablas pequeñas (512/128 buckets) — Regresión por D-cache**
 - Efecto en hardware: 35–51fps con `& 511` (perf3), 39–50fps con XOR-fold `& 511` (perf4). Ambas configuraciones por debajo del baseline 46–57fps.
 - Causa: reducir el número de buckets de 701→512 (TCACHE) y 127→128 (FCACHE) alarga los chains. El factor dominante no es el costo del `%` (36 ciclos SH4) sino los D-cache misses por chain walk: cada nodo accede a una posición aleatoria en `cache_tile[7680]` (120KB), garantizando ~50 ciclos de miss en la D-cache de 8KB del SH4. Con 512 buckets el chain avg sube de 11 a 15 nodos: 4 nodos × 50 ciclos × 1000 lookups/frame = 200,000 ciclos adicionales/frame. El ahorro de `%`→`&` (35 ciclos × 1000 = 35,000 ciclos) no compensa. La solución correcta fue aumentar los buckets (1024/256), no sólo cambiar el operador.
