@@ -591,8 +591,8 @@ int run_mainMenu()
 	int end,need_reset=-1;
 	mainMenu_case=-1;
 #ifdef AUTORUN
-	/* Skip menu entirely — boot directly with fixed defaults. */
-	neogeo_adjust_frameskip(0);
+	/* Boot directly: Region=USA (neo4all.h default), Frameskip=auto, Filter=none. */
+	neogeo_adjust_frameskip(-1);
 	neogeo_adjust_cycles(menuCPU_68k, menuCPU_z80);
 #if defined(DREAMCAST) && !defined(AES)
 	if (!try_to_list_files())

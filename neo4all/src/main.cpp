@@ -903,6 +903,47 @@ void neogeo_adjust_fine_cycles(int new_68k, int new_z80)
 }
 #endif
 
+#if defined(DREAMCAST) && defined(PROFILER_NEO4ALL)
+static void vmu_draw_stats(unsigned fps)
+{
+    static uint32_t fps_sum   = 0;
+    static uint16_t fps_count = 0;
+    fps_sum += fps;
+    fps_count++;
+    unsigned fps_avg = fps_count ? fps_sum / fps_count : fps;
+
+    static unsigned long long prev_main = 0, prev_m68k = 0, prev_z80 = 0, prev_blt = 0;
+    unsigned long long d_main = neo4all_prof_sum[NEO4ALL_PROFILER_MAIN] - prev_main;
+    unsigned long long d_m68k = neo4all_prof_sum[NEO4ALL_PROFILER_M68K] - prev_m68k;
+    unsigned long long d_z80  = neo4all_prof_sum[NEO4ALL_PROFILER_Z80]  - prev_z80;
+    unsigned long long d_blt  = neo4all_prof_sum[NEO4ALL_PROFILER_BLIT] - prev_blt;
+    prev_main = neo4all_prof_sum[NEO4ALL_PROFILER_MAIN];
+    prev_m68k = neo4all_prof_sum[NEO4ALL_PROFILER_M68K];
+    prev_z80  = neo4all_prof_sum[NEO4ALL_PROFILER_Z80];
+    prev_blt  = neo4all_prof_sum[NEO4ALL_PROFILER_BLIT];
+
+    unsigned pct_m68k = d_main ? (unsigned)(d_m68k * 100 / d_main) : 0;
+    unsigned pct_z80  = d_main ? (unsigned)(d_z80  * 100 / d_main) : 0;
+    unsigned pct_blt  = d_main ? (unsigned)(d_blt  * 100 / d_main) : 0;
+
+    vmufb_t fb;
+    vmufb_clear(&fb);
+
+    char line[13];
+    snprintf(line, sizeof(line), "M68: %3u%%", pct_m68k > 999 ? 999 : pct_m68k);
+    vmufb_print_string_into(&fb, NULL, 0, 1, 48, 6, 0, line);
+    snprintf(line, sizeof(line), "Z80: %3u%%", pct_z80 > 999 ? 999 : pct_z80);
+    vmufb_print_string_into(&fb, NULL, 0, 9, 48, 6, 0, line);
+    snprintf(line, sizeof(line), "BLT: %3u%%", pct_blt > 999 ? 999 : pct_blt);
+    vmufb_print_string_into(&fb, NULL, 0, 17, 48, 6, 0, line);
+    snprintf(line, sizeof(line), "AVG: %3ufps", fps_avg > 999 ? 999 : fps_avg);
+    vmufb_print_string_into(&fb, NULL, 0, 25, 48, 6, 0, line);
+
+    maple_device_t *dev;
+    for (int p = 0; (dev = maple_enum_type(p, MAPLE_FUNC_LCD)) != NULL; p++)
+        vmufb_present(&fb, dev);
+}
+#endif
 
 //----------------------------------------------------------------------------
 void	neogeo_run(void)
@@ -1130,6 +1171,21 @@ void	neogeo_run(void)
 		neogeo_frameskip_count++;
 #if defined(AES) && defined(DREAMCAST) && !defined(AES_PREFETCHING)
 		current_mmu_frame=now_mmu_frame+1;
+#endif
+
+#if defined(DREAMCAST) && defined(PROFILER_NEO4ALL)
+		{
+			static uint32_t _fps_frames = 0;
+			static uint32_t _fps_t0     = 0;
+			_fps_frames++;
+			uint32_t _now = SDL_GetTicks();
+			if (_fps_t0 == 0) _fps_t0 = _now;
+			if (_now - _fps_t0 >= 1000) {
+				vmu_draw_stats(_fps_frames);
+				_fps_frames = 0;
+				_fps_t0     = _now;
+			}
+		}
 #endif
 	}
 	// Stop CDDA
